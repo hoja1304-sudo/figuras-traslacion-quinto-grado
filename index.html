@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123a5a">
+  <title>Reconocer figuras por traslación · Quinto grado</title>
+  <style>
+    :root {
+      --ink: #102f49; --blue: #166995; --blue-dark: #123a5a; --sky: #eaf6fb; --paper: #fffdf8;
+      --gold: #f3b942; --green: #177b4e; --grid: #b9cede; --axis: #1b2b38; --ghost: #b0790c;
+      --shadow: 0 14px 34px rgba(15, 47, 73, .14);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { background: #dcecf3; }
+    body { margin: 0; min-height: 100vh; color: var(--ink);
+      background: radial-gradient(circle at 12% 8%, rgba(243,185,66,.22), transparent 24rem), linear-gradient(145deg, #eef8fb 0%, #dcecf3 100%);
+      font-family: Arial, Helvetica, sans-serif; line-height: 1.45; }
+    button { font: inherit; cursor: pointer; }
+    button:focus-visible { outline: 4px solid rgba(243,185,66,.72); outline-offset: 3px; }
+    .wrap { width: min(1160px, 100%); margin: 0 auto; padding: clamp(14px, 3vw, 32px); }
+
+    header.hero { overflow: hidden; border-radius: 26px; color: white;
+      background: linear-gradient(135deg, #123a5a, #176f98); box-shadow: var(--shadow);
+      padding: clamp(22px, 4vw, 40px) clamp(20px, 4vw, 44px); text-align: center; }
+    header.hero h1 { margin: 0; font-size: clamp(1.3rem, 3.6vw, 2.1rem); line-height: 1.15; }
+    header.hero p { margin: 12px auto 0; max-width: 680px; color: #dceff8; font-size: clamp(.98rem, 2.1vw, 1.1rem); }
+
+    .panel { border: 1px solid rgba(18,58,90,.14); border-radius: 22px; background: var(--paper); box-shadow: var(--shadow); padding: clamp(16px, 3vw, 28px); }
+
+    .pill-btn { display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--gold);
+      border-radius: 999px; padding: 11px 24px; min-height: 48px; background: linear-gradient(135deg,#fff6df,#f6e2ad);
+      color: #6a4a06; font-weight: 800; font-size: 1rem; box-shadow: 0 5px 0 #e2c574, 0 10px 22px rgba(120,90,10,.14);
+      transition: transform .12s, box-shadow .12s; }
+    .pill-btn:hover { transform: translateY(-2px); }
+    .pill-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #e2c574; }
+
+    /* Menú principal */
+    .menu-wrap { text-align: center; }
+    .menu-sub { color:#4a6675; font-size:1rem; margin: 4px 0 18px; }
+    .menu { display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; max-width: 640px; margin: 0 auto; }
+    @media (max-width: 620px){ .menu { grid-template-columns: 1fr; } }
+    .menu-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-align:center;
+      min-height: 150px; border:2px solid var(--gold); border-radius:22px; padding:22px 18px;
+      background: linear-gradient(135deg,#ffffff,#eaf6fb); color:var(--blue-dark); font-weight:900; font-size:1.12rem;
+      box-shadow: 0 6px 0 #d9e6ee, 0 16px 30px rgba(18,58,90,.14); transition: transform .12s, box-shadow .12s; cursor:pointer; }
+    .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #d9e6ee, 0 20px 34px rgba(18,58,90,.2); }
+    .menu-btn:active { transform: translateY(2px); box-shadow: 0 3px 0 #d9e6ee; }
+    .menu-btn .ic { font-size:2.2rem; line-height:1; }
+    .menu-btn small { font-weight:600; color:#5a7686; font-size:.82rem; max-width: 220px; }
+    .panel-nav { margin: 0 0 14px; }
+    .back-btn { display:inline-flex; align-items:center; gap:6px; border:2px solid #bcd2dd; border-radius:999px;
+      padding: 9px 18px; min-height:44px; background:#fff; color:var(--blue-dark); font-weight:800;
+      box-shadow:0 4px 0 #d3e1e7; transition:transform .12s, box-shadow .12s; }
+    .back-btn:hover { border-color: var(--blue); transform: translateY(-2px); }
+    .back-btn:active { transform: translateY(2px); box-shadow:0 1px 0 #d3e1e7; }
+
+    /* Laboratorio */
+    .lab { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(16px, 3vw, 26px); align-items: start; }
+    @media (max-width: 860px) { .lab { grid-template-columns: 1fr; } }
+    .plane-card { border: 1px solid #c8dbe4; border-radius: 18px; background: white; padding: 10px; }
+    .plane { display: block; width: 100%; height: auto; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 8px 2px 2px; font-size: .86rem; color: #46626f; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .dotk { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; }
+    .dotk.b { border-color: var(--blue); background: rgba(22,105,149,.18); }
+    .dotk.g { border-color: var(--green); background: rgba(23,123,78,.18); }
+
+    .lab-title { text-align: center; margin: 0 0 10px; font-size: 1.12rem; color: var(--blue-dark); }
+    .instr-row { display: flex; justify-content: center; margin: 0 0 14px; }
+    .instr-btn { display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--blue);
+      border-radius: 999px; padding: 9px 20px; min-height: 44px; background: var(--sky); color: var(--blue-dark);
+      font-weight: 800; box-shadow: 0 4px 0 #cbe0ea; transition: transform .12s, box-shadow .12s, background .12s; }
+    .instr-btn:hover { transform: translateY(-2px); }
+    .instr-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #cbe0ea; }
+    .instr-btn.speaking { background: var(--gold); border-color: #d99e1c; color: #6a4a06; box-shadow: 0 4px 0 #d9b45f; }
+    .instr-btn .instr-ic { font-size: 1.15rem; line-height: 1; }
+
+    .fig-title { text-align:center; color:#56707f; font-size:.9rem; margin: 0 0 8px; }
+    .fig-select { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:0 0 16px; }
+    .fig-btn { display:inline-flex; align-items:center; gap:6px; border:2px solid #bcd2dd; border-radius:14px;
+      padding:9px 15px; min-height:46px; background:#fff; color:var(--blue-dark); font-weight:800; box-shadow:0 4px 0 #d3e1e7;
+      transition: transform .12s, box-shadow .12s, border-color .12s, background .12s; }
+    .fig-btn:hover { border-color:var(--blue); transform:translateY(-2px); }
+    .fig-btn:active { transform:translateY(2px); box-shadow:0 1px 0 #d3e1e7; }
+    .fig-btn.active { background:var(--sky); border-color:var(--blue); color:var(--blue-dark); }
+    .fig-btn .fic { font-size:1.15rem; line-height:1; }
+
+    .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 340px; margin: 0 auto; }
+    .dir { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+      min-height: 76px; padding: 8px; border: 2px solid #bcd2dd; border-radius: 16px; background: white;
+      color: var(--blue-dark); font-weight: 800; box-shadow: 0 5px 0 #d3e1e7; transition: transform .12s, box-shadow .12s, border-color .12s; }
+    .dir:hover { border-color: var(--blue); transform: translateY(-2px); }
+    .dir:active { transform: translateY(3px); box-shadow: 0 2px 0 #d3e1e7; }
+    .dir:disabled { opacity: .45; cursor: default; box-shadow: 0 2px 0 #d3e1e7; transform: none; }
+    .dir .arrow { font-size: 1.5rem; line-height: 1; }
+    .dir .lbl { font-size: .82rem; }
+    .dir .count { min-width: 30px; padding: 1px 8px; border-radius: 999px; background: var(--sky); color: var(--blue-dark); font-size: .95rem; }
+    .dir.armed .count { background: var(--gold); }
+    .n { grid-column: 2; grid-row: 1; } .o { grid-column: 1; grid-row: 2; }
+    .go-cell { grid-column: 2; grid-row: 2; } .e { grid-column: 3; grid-row: 2; } .s { grid-column: 2; grid-row: 3; }
+    .go { width: 100%; min-height: 76px; border: 0; border-radius: 16px; color: white; background: var(--green);
+      font-weight: 900; font-size: .96rem; box-shadow: 0 5px 0 #0f5836; }
+    .go:active { transform: translateY(3px); box-shadow: 0 2px 0 #0f5836; }
+    .go:disabled { opacity: .5; cursor: default; box-shadow: none; }
+
+    .row-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; justify-content: center; }
+    .ghost-btn { border: 2px solid #bcd2dd; border-radius: 13px; padding: 10px 16px; min-height: 44px; background: white; color: var(--blue-dark); font-weight: 700; }
+    .ghost-btn:hover { border-color: var(--blue); }
+
+    .move-note { margin: 16px 0 0; padding: 11px 14px; border-radius: 13px; background: var(--sky); color: #1c4d67; font-size: .95rem; min-height: 46px; }
+    .move-note strong { color: var(--blue-dark); }
+
+    /* Problemas */
+    .prob-top { display: flex; justify-content: center; margin-bottom: 12px; }
+    .prob-intro { text-align:center; color:#4a6675; font-size:.95rem; margin: 0 0 14px; }
+    .item { border: 1px solid #d7e3ea; border-radius: 18px; background: #fff; box-shadow: var(--shadow);
+      padding: 18px; margin: 18px 0; font-family: Arial, Helvetica, sans-serif; font-size: 12pt; color:#152f40; }
+    .item .num { display:inline-flex; align-items:center; justify-content:center; min-width: 30px; height:30px;
+      border-radius: 999px; background: var(--blue-dark); color:#fff; font-weight: 800; font-size: .92rem; margin-right: 8px; vertical-align: middle; }
+    .item .enun { font-size: 12pt; line-height: 1.5; margin: 0; }
+    .scene { display:block; width: min(360px, 100%); height:auto; margin: 12px auto; background:#fff; }
+    .opts { display: grid; gap: 10px; margin: 14px 0 6px; }
+    .opts-graf { display:grid; grid-template-columns: repeat(auto-fit, minmax(210px,1fr)); gap:12px; margin:14px 0 6px; }
+    .opt { display:flex; align-items:center; gap: 10px; border: 2px solid #cdd9e1; border-radius: 12px;
+      padding: 10px 14px; background:#fff; text-align:left; font-size: 12pt; color:#152f40; cursor:pointer; transition: border-color .15s, background .15s; }
+    .opt:hover { border-color: var(--blue); }
+    .opt .key { font-weight: 800; color: var(--blue-dark); min-width: 24px; }
+    .opt .otext { flex: 1; }
+    .opt .mark { margin-left: auto; font-weight: 900; font-size: 1.15rem; min-width: 18px; text-align:center; }
+    .opt-scene { flex-direction: column; align-items: stretch; }
+    .opt-scene .ohead { display:flex; justify-content: space-between; align-items:center; }
+    .opt.correct { border-color: #1a9e57; background: #e9f9f0; } .opt.correct .mark { color:#1a9e57; }
+    .opt.wrong { border-color: #d64545; background: #fdeaee; } .opt.wrong .mark { color:#d64545; }
+    .fb { margin: 8px 0 0; font-weight: 800; } .fb.ok { color:#1a9e57; } .fb.no { color:#d64545; }
+    .solucion { margin-top: 12px; border-left: 5px solid var(--gold); background:#fffdf5; border-radius: 0 12px 12px 0; padding: 12px 16px; font-size: 11.5pt; color:#3a3013; line-height:1.55; }
+    .solucion h4 { margin: 0 0 8px; color: var(--blue-dark); } .solucion p { margin: 5px 0; }
+    .item-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top: 14px; }
+    .act-btn { display:inline-flex; align-items:center; gap:6px; border:2px solid #bcd2dd; border-radius: 999px; padding: 8px 16px; min-height: 42px; background:#fff; color: var(--blue-dark); font-weight: 800; font-size:.9rem; }
+    .act-btn:hover { border-color: var(--blue); }
+    .placeholder { text-align:center; color:#6d8695; padding: 26px 16px; border: 2px dashed #cdd9e1; border-radius: 14px; background:#fafdff; }
+    .nota { border:1px solid #b9cede; background:#f3f8fc; border-radius:10px; padding:8px 12px; margin:6px auto 2px; max-width:360px; text-align:center; font-size:11pt; color:#33566b; font-weight:700; }
+    @media print {
+      body * { visibility: hidden !important; }
+      .item.printing, .item.printing * { visibility: visible !important; }
+      .item.printing { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; }
+      .item.printing .item-actions, .item.printing .fb { display: none !important; }
+    }
+    footer.credit { margin: 22px 0 0; text-align: center; color: #667985; font-size: .86rem; }
+    footer.credit strong { color: #435b6a; }
+    @media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>Reconocer figuras que se obtienen mediante traslación de otras. Quinto grado.</h1>
+      <p>Experimenta trasladando figuras en la cuadrícula y practica reconociendo traslaciones.</p>
+    </header>
+
+    <!-- Menú principal -->
+    <section id="menu" class="menu-wrap">
+      <p class="menu-sub">Elige una sección para comenzar:</p>
+      <div class="menu">
+        <button class="menu-btn" data-go="lab" type="button"><span class="ic" aria-hidden="true">🧪</span>Laboratorio<small>Traslada figuras en la cuadrícula</small></button>
+        <button class="menu-btn" data-go="prob" type="button"><span class="ic" aria-hidden="true">📝</span>Problemas<small>Practica con ítems y soluciones</small></button>
+      </div>
+    </section>
+
+    <!-- Laboratorio -->
+    <section class="panel" id="panelLab" aria-label="Laboratorio" hidden>
+      <div class="panel-nav"><button class="back-btn" data-go="menu" type="button">← Volver al menú</button></div>
+      <div class="lab">
+        <div>
+          <div class="plane-card">
+            <svg id="plane" class="plane" viewBox="0 0 552 512" role="img" aria-label="Cuadrícula de 16 por 16 en el primer cuadrante con una figura que se puede trasladar"></svg>
+          </div>
+          <div class="legend">
+            <span><i class="dotk b"></i> Azul: posición inicial</span>
+            <span><i class="dotk g"></i> Verde: nueva posición</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <h2 class="lab-title">Traslada la figura</h2>
+          <div class="instr-row">
+            <button id="instrBtn" class="instr-btn" type="button" aria-pressed="false">
+              <span class="instr-ic" aria-hidden="true">🔊</span><span class="instr-txt" data-play="Instrucciones" data-pause="Pausar">Instrucciones</span>
+            </button>
+          </div>
+
+          <p class="fig-title">Elige la figura que aparecerá en la cuadrícula:</p>
+          <div class="fig-select">
+            <button class="fig-btn" type="button" data-fig="cuadrado"><span class="fic" aria-hidden="true">◼</span>Cuadrado</button>
+            <button class="fig-btn" type="button" data-fig="rectangulo"><span class="fic" aria-hidden="true">▬</span>Rectángulo</button>
+            <button class="fig-btn" type="button" data-fig="circulo"><span class="fic" aria-hidden="true">●</span>Círculo</button>
+            <button class="fig-btn" type="button" data-fig="punto"><span class="fic" aria-hidden="true">•</span>Punto</button>
+          </div>
+
+          <div class="pad">
+            <button class="dir n" type="button" data-dir="norte" aria-label="Norte, hacia arriba">
+              <span class="arrow" aria-hidden="true">↑</span><span class="lbl">Norte</span><span class="count" data-count="norte">0</span></button>
+            <button class="dir o" type="button" data-dir="oeste" aria-label="Oeste, hacia la izquierda">
+              <span class="arrow" aria-hidden="true">←</span><span class="lbl">Oeste</span><span class="count" data-count="oeste">0</span></button>
+            <div class="go-cell"><button id="go" class="go" type="button">Trasladar</button></div>
+            <button class="dir e" type="button" data-dir="este" aria-label="Este, hacia la derecha">
+              <span class="arrow" aria-hidden="true">→</span><span class="lbl">Este</span><span class="count" data-count="este">0</span></button>
+            <button class="dir s" type="button" data-dir="sur" aria-label="Sur, hacia abajo">
+              <span class="arrow" aria-hidden="true">↓</span><span class="lbl">Sur</span><span class="count" data-count="sur">0</span></button>
+          </div>
+
+          <div class="row-actions">
+            <button id="reset" class="ghost-btn" type="button">Reiniciar</button>
+            <button id="volver" class="ghost-btn" type="button">Volver al inicio</button>
+          </div>
+
+          <p id="moveNote" class="move-note" aria-live="polite">Elige una figura para comenzar.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problemas -->
+    <section class="panel" id="panelProb" aria-label="Problemas" hidden>
+      <div class="panel-nav"><button class="back-btn" data-go="menu" type="button">← Volver al menú</button></div>
+      <div class="prob-top">
+        <button id="btnNuevo" class="pill-btn" type="button">🔄 Nuevo ítem</button>
+      </div>
+      <p class="prob-intro">Selecciona una opción. Si es correcta, su borde se marca en verde con un ✓; si es incorrecta, se muestra la solución paso a paso.</p>
+      <div id="itemsWrap"></div>
+    </section>
+
+    <footer class="credit"><strong>Elaborado por: Alberto Jiménez Ruiz</strong><br>Asesor Regional de Matemática DRE-Cartago-DAP-2026</footer>
+  </main>
+
+  <!-- Librerías para exportar a PDF (si hay conexión); si no, se usa Imprimir -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- ===================== LABORATORIO (figuras) ===================== -->
+  <script>
+    (() => {
+      'use strict';
+      const $ = (s, r = document) => r.querySelector(s);
+      const NS = 'http://www.w3.org/2000/svg';
+      const el = (n, a) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; };
+
+      // --- Cuadrícula 16x16, primer cuadrante ---
+      const N = 16, unit = 28, ox = 34, oyTop = 34;
+      const oy = oyTop + N * unit;               // y = 0 (base)
+      const PX = x => ox + x * unit, PY = y => oy - y * unit;
+      const svg = $('#plane');
+
+      // rejilla punteada
+      for (let i = 0; i <= N; i++) {
+        svg.appendChild(el('line', { x1: PX(i), y1: PY(0), x2: PX(i), y2: PY(N), stroke: 'var(--grid)', 'stroke-width': 1, 'stroke-dasharray': '4 4' }));
+        svg.appendChild(el('line', { x1: PX(0), y1: PY(i), x2: PX(N), y2: PY(i), stroke: 'var(--grid)', 'stroke-width': 1, 'stroke-dasharray': '4 4' }));
+      }
+      // ejes sólidos con flechas
+      const xTip = PX(N) + 16, yTip = PY(N) - 16;
+      svg.appendChild(el('line', { x1: PX(0), y1: PY(0), x2: xTip, y2: PY(0), stroke: 'var(--axis)', 'stroke-width': 2.4 }));
+      svg.appendChild(el('line', { x1: PX(0), y1: PY(0), x2: PX(0), y2: yTip, stroke: 'var(--axis)', 'stroke-width': 2.4 }));
+      svg.appendChild(el('path', { d: `M${xTip} ${PY(0)} l-11 -6 v12 z`, fill: 'var(--axis)' }));
+      svg.appendChild(el('path', { d: `M${PX(0)} ${yTip} l-6 11 h12 z`, fill: 'var(--axis)' }));
+      const txt = (x, y, s, extra) => { const e = el('text', Object.assign({ x, y, 'font-family': 'Arial', 'font-size': 15, 'font-weight': 700, fill: '#1b2b38' }, extra || {})); e.textContent = s; svg.appendChild(e); };
+      // etiquetas pegadas a la punta de cada flecha (regla de ubicación)
+      txt(xTip + 10, PY(0), 'este', { 'text-anchor': 'start', 'dominant-baseline': 'middle' });
+      txt(PX(0), yTip - 8, 'norte', { 'text-anchor': 'middle' });
+
+      // capas
+      const moveTrail = el('polyline', { fill: 'none', stroke: 'var(--ghost)', 'stroke-width': 2.4, 'stroke-dasharray': '7 6', 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: 0 });
+      const ghostPath = el('polyline', { fill: 'none', stroke: 'var(--ghost)', 'stroke-width': 2, 'stroke-dasharray': '7 6', 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: 0 });
+      const ghostG = el('g', { opacity: 0 });
+      const originG = el('g', { opacity: 0 });
+      const movingG = el('g', { opacity: 0 });
+      [moveTrail, ghostPath, ghostG, originG, movingG].forEach(g => svg.appendChild(g));
+
+      const BLUE = { s: '#166995', f: 'rgba(22,105,149,.20)' };
+      const GREEN = { s: '#177b4e', f: 'rgba(23,123,78,.20)' };
+      const GHOST = { s: 'var(--ghost)', f: 'none' };
+
+      const clear = g => { while (g.firstChild) g.removeChild(g.firstChild); };
+      const round = v => Math.round(v * 100) / 100;
+
+      // dimensiones de la figura (en unidades)
+      function dims(st) {
+        if (st.type === 'cuadrado') return { w: st.size, h: st.size };
+        if (st.type === 'rectangulo') return { w: 2, h: 1 };
+        return { w: 0, h: 0 };
+      }
+      // límites del ancla para que NADA se salga de la cuadrícula
+      function limits(st) {
+        if (st.type === 'circulo') return { xmin: st.size, xmax: N - st.size, ymin: st.size, ymax: N - st.size };
+        if (st.type === 'punto') return { xmin: 0, xmax: N, ymin: 0, ymax: N };
+        const d = dims(st); return { xmin: 0, xmax: N - d.w, ymin: 0, ymax: N - d.h };
+      }
+      // punto de referencia (A) = ancla, para el rastro y el texto
+      const refA = st => ({ x: st.ax, y: st.ay });
+
+      // dibuja la figura dentro de un grupo
+      function draw(g, st, col, opts) {
+        opts = opts || {}; clear(g);
+        const dot = (x, y) => g.appendChild(el('circle', { cx: PX(x), cy: PY(y), r: 4, fill: col.s }));
+        const label = (x, y, s, dx, dy) => { if (!opts.labels) return; const t = el('text', { x: PX(x) + dx, y: PY(y) + dy, 'font-family': 'Arial', 'font-size': 15, 'font-weight': 800, fill: '#12344b' }); t.textContent = s; g.appendChild(t); };
+        const dash = opts.dashed ? { 'stroke-dasharray': '6 5' } : {};
+        if (st.type === 'cuadrado' || st.type === 'rectangulo') {
+          const d = dims(st), ax = st.ax, ay = st.ay;
+          const A = [ax, ay], B = [ax + d.w, ay], C = [ax + d.w, ay + d.h], D = [ax, ay + d.h];
+          const pts = [A, B, C, D].map(p => `${PX(p[0])},${PY(p[1])}`).join(' ');
+          g.appendChild(el('polygon', Object.assign({ points: pts, fill: col.f, stroke: col.s, 'stroke-width': 2.6, 'stroke-linejoin': 'round' }, dash)));
+          if (!opts.dashed) { [A, B, C, D].forEach(p => dot(p[0], p[1])); }
+          label(A[0], A[1], 'A', -14, 15); label(B[0], B[1], 'B', 8, 15);
+          label(C[0], C[1], 'C', 8, -8); label(D[0], D[1], 'D', -14, -8);
+        } else if (st.type === 'circulo') {
+          g.appendChild(el('circle', Object.assign({ cx: PX(st.ax), cy: PY(st.ay), r: st.size * unit, fill: col.f, stroke: col.s, 'stroke-width': 2.6 }, dash)));
+          if (!opts.dashed) dot(st.ax, st.ay);
+          label(st.ax, st.ay, 'A', 9, -8);
+        } else { // punto
+          g.appendChild(el('circle', { cx: PX(st.ax), cy: PY(st.ay), r: 5.5, fill: col.s }));
+          label(st.ax, st.ay, 'A', 9, -8);
+        }
+      }
+      const showG = (g, on) => g.setAttribute('opacity', on ? 1 : 0);
+
+      // --- Estado ---
+      let figure = null;      // { type, size, ax, ay }
+      let startState = null;  // copia de la posición inicial
+      let animating = false, outWarned = false, firstAxis = null;
+      const counts = { este: 0, oeste: 0, norte: 0, sur: 0 };
+      const randInt = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+
+      const axisOf = d => (d === 'este' || d === 'oeste') ? 'h' : 'v';
+      const delta = () => ({ dx: counts.este - counts.oeste, dy: counts.norte - counts.sur });
+      function describe(c) {
+        const p = [];
+        if (c.este) p.push(`${c.este} al este`); if (c.oeste) p.push(`${c.oeste} al oeste`);
+        if (c.norte) p.push(`${c.norte} al norte`); if (c.sur) p.push(`${c.sur} al sur`);
+        return p.join(' y ');
+      }
+      function pathPoints(from, dx, dy, order) {
+        const pts = [{ x: from.x, y: from.y }];
+        const addH = () => { const last = pts[pts.length - 1]; if (dx !== 0) pts.push({ x: from.x + dx, y: last.y }); };
+        const addV = () => { const last = pts[pts.length - 1]; if (dy !== 0) pts.push({ x: last.x, y: from.y + dy }); };
+        if (order === 'v') { addV(); addH(); } else { addH(); addV(); }
+        return pts;
+      }
+      const ptsToStr = pts => pts.map(p => `${PX(p.x)},${PY(p.y)}`).join(' ');
+
+      function refreshCounts() {
+        document.querySelectorAll('[data-count]').forEach(sp => {
+          const d = sp.getAttribute('data-count'); sp.textContent = counts[d];
+          sp.closest('.dir').classList.toggle('armed', counts[d] > 0);
+        });
+      }
+      function setPadEnabled(on) {
+        document.querySelectorAll('.dir').forEach(b => b.disabled = !on);
+      }
+
+      function withAnchor(st, ax, ay) { return { type: st.type, size: st.size, ax, ay }; }
+
+      function showGhost() {
+        const note = $('#moveNote');
+        if (!figure) { $('#go').disabled = true; return; }
+        const { dx, dy } = delta();
+        if (dx === 0 && dy === 0) {
+          showG(ghostG, false); ghostPath.setAttribute('opacity', 0); outWarned = false;
+          note.innerHTML = 'Selecciona una traslación y presiona <strong>Trasladar</strong>.';
+          $('#go').disabled = true; return;
+        }
+        const L = limits(figure);
+        const tx = figure.ax + dx, ty = figure.ay + dy;
+        const inside = tx >= L.xmin && tx <= L.xmax && ty >= L.ymin && ty <= L.ymax;
+        draw(ghostG, withAnchor(figure, tx, ty), GHOST, { dashed: true });
+        showG(ghostG, true); ghostG.setAttribute('opacity', inside ? .95 : .35);
+        ghostPath.setAttribute('points', ptsToStr(pathPoints(refA(figure), dx, dy, firstAxis || 'h')));
+        ghostPath.setAttribute('opacity', inside ? .9 : .35);
+        $('#go').disabled = !inside || animating;
+        if (inside) { outWarned = false; note.innerHTML = `Traslación: <strong>${describe(counts)}</strong>. Presiona <strong>Trasladar</strong>.`; }
+        else { if (!outWarned) { outWarned = true; speakOnce('Utiliza otra traslación para no salir de la cuadrícula.'); } note.textContent = 'Utiliza otra traslación para no salir de la cuadrícula.'; }
+      }
+
+      function animate(from, dx, dy, order, done) {
+        animating = true; $('#go').disabled = true; setPadEnabled(false);
+        showG(ghostG, false); ghostPath.setAttribute('opacity', 0);
+        const refFrom = refA(from);
+        const pts = pathPoints(refFrom, dx, dy, order), end = pts[pts.length - 1];
+        const segLen = []; let total = 0;
+        for (let i = 1; i < pts.length; i++) { const l = Math.abs(pts[i].x - pts[i - 1].x) + Math.abs(pts[i].y - pts[i - 1].y); segLen.push(l); total += l; }
+        const drawTrail = tr => { moveTrail.setAttribute('points', ptsToStr(tr)); moveTrail.setAttribute('opacity', .9); };
+        let fin = false;
+        const finish = () => { if (fin) return; fin = true; draw(movingG, withAnchor(from, from.ax + dx, from.ay + dy), GREEN, { labels: true }); drawTrail(pts); animating = false; setPadEnabled(true); done(); };
+        if (total === 0) { finish(); return; }
+        function at(dist) {
+          let d = dist, i = 0; const tr = [pts[0]];
+          while (i < segLen.length && d >= segLen[i]) { d -= segLen[i]; i++; tr.push(pts[i]); }
+          if (i >= segLen.length) return { pos: end, tr };
+          const a = pts[i], b = pts[i + 1], f = segLen[i] === 0 ? 0 : d / segLen[i];
+          const pos = { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f }; tr.push(pos); return { pos, tr };
+        }
+        const dur = Math.min(1800, Math.max(600, total * 240)), t0 = performance.now();
+        const ease = p => p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        (function step(now) {
+          if (fin) return;
+          const p = Math.min(1, (now - t0) / dur), e = ease(p);
+          const r = at(total * e);
+          draw(movingG, withAnchor(from, from.ax + (r.pos.x - refFrom.x), from.ay + (r.pos.y - refFrom.y)), GREEN, { labels: true });
+          drawTrail(r.tr);
+          if (p < 1) requestAnimationFrame(step); else finish();
+        })(performance.now());
+        setTimeout(finish, dur + 300);
+      }
+
+      // --- Crear figura aleatoria del tipo elegido ---
+      function newFigure(type) {
+        const size = type === 'cuadrado' ? randInt(1, 2) : type === 'circulo' ? randInt(1, 2) : type === 'rectangulo' ? 1 : 0;
+        const st = { type, size, ax: 0, ay: 0 };
+        const L = limits(st);
+        st.ax = randInt(L.xmin, L.xmax); st.ay = randInt(L.ymin, L.ymax);
+        figure = st; startState = Object.assign({}, st);
+        counts.este = counts.oeste = counts.norte = counts.sur = 0; firstAxis = null; outWarned = false;
+        showG(originG, false); moveTrail.setAttribute('opacity', 0); showG(ghostG, false); ghostPath.setAttribute('opacity', 0);
+        draw(movingG, figure, BLUE, { labels: true }); showG(movingG, true);
+        setPadEnabled(true); refreshCounts();
+        document.querySelectorAll('.fig-btn').forEach(b => b.classList.toggle('active', b.dataset.fig === type));
+        const nm = { cuadrado: 'un cuadrado', rectangulo: 'un rectángulo', circulo: 'un círculo', punto: 'un punto' }[type];
+        $('#moveNote').innerHTML = `Apareció <strong>${nm}</strong>. Elige una traslación y presiona <strong>Trasladar</strong>.`;
+        $('#go').disabled = true;
+      }
+
+      // volver a la posición inicial (misma figura)
+      function volverInicio() {
+        if (!figure || !startState) return;
+        figure = Object.assign({}, startState);
+        counts.este = counts.oeste = counts.norte = counts.sur = 0; firstAxis = null; outWarned = false;
+        showG(originG, false); moveTrail.setAttribute('opacity', 0); showG(ghostG, false); ghostPath.setAttribute('opacity', 0);
+        draw(movingG, figure, BLUE, { labels: true }); showG(movingG, true);
+        setPadEnabled(true); refreshCounts();
+        $('#moveNote').innerHTML = 'La figura volvió a su posición inicial. Elige una traslación y presiona <strong>Trasladar</strong>.';
+        $('#go').disabled = true;
+      }
+
+      // reiniciar el juego: pedir elegir otra figura
+      function reiniciar() {
+        figure = null; startState = null;
+        counts.este = counts.oeste = counts.norte = counts.sur = 0; firstAxis = null; outWarned = false;
+        [movingG, originG, ghostG].forEach(g => { showG(g, false); clear(g); });
+        moveTrail.setAttribute('opacity', 0); ghostPath.setAttribute('opacity', 0);
+        document.querySelectorAll('.fig-btn').forEach(b => b.classList.remove('active'));
+        setPadEnabled(false); refreshCounts();
+        $('#moveNote').textContent = 'Elige una figura para comenzar: cuadrado, rectángulo, círculo o punto.';
+        $('#go').disabled = true;
+      }
+
+      // --- Eventos ---
+      document.querySelectorAll('.fig-btn').forEach(b => b.addEventListener('click', () => { if (animating) return; newFigure(b.dataset.fig); }));
+      document.querySelectorAll('.dir').forEach(btn => btn.addEventListener('click', () => {
+        if (animating || !figure) return;
+        if (firstAxis === null) firstAxis = axisOf(btn.dataset.dir);
+        counts[btn.dataset.dir]++; refreshCounts(); showGhost();
+      }));
+      $('#go').addEventListener('click', () => {
+        if (animating || !figure) return;
+        const { dx, dy } = delta(); if (dx === 0 && dy === 0) return;
+        const L = limits(figure), tx = figure.ax + dx, ty = figure.ay + dy;
+        if (tx < L.xmin || tx > L.xmax || ty < L.ymin || ty > L.ymax) return;
+        const from = Object.assign({}, figure), order = firstAxis || 'h';
+        const a0 = refA(from), a1 = { x: a0.x + dx, y: a0.y + dy };
+        draw(originG, from, BLUE, { labels: true }); showG(originG, true);
+        moveTrail.setAttribute('opacity', 0);
+        const desc = describe(counts);
+        animate(from, dx, dy, order, () => {
+          figure = withAnchor(from, from.ax + dx, from.ay + dy);
+          counts.este = counts.oeste = counts.norte = counts.sur = 0; firstAxis = null;
+          refreshCounts();
+          $('#moveNote').innerHTML = `Se trasladó <strong>${desc}</strong><br>El punto A pasó de <strong>(${round(a0.x)}, ${round(a0.y)})</strong> a <strong>(${round(a1.x)}, ${round(a1.y)})</strong>.`;
+          $('#go').disabled = true;
+        });
+      });
+      $('#reset').addEventListener('click', () => { if (!animating) reiniciar(); });
+      $('#volver').addEventListener('click', () => { if (!animating) volverInicio(); });
+
+      // --- Instrucciones habladas ---
+      const synth = window.speechSynthesis;
+      let curBtn = null;
+      const instrText = 'Elige una figura: cuadrado, rectángulo, círculo o punto; aparecerá en un lugar al azar de la cuadrícula. Cada lado de un cuadro de la cuadrícula mide una unidad. Toca cada dirección (Este, Norte, Oeste o Sur) para desplazar la figura una unidad y luego presiona Trasladar para animar el movimiento. Con Volver al inicio la figura regresa a su posición inicial, y con Reiniciar puedes elegir otra figura. Recuerda que la figura no puede salirse de la cuadrícula.';
+      function pickVoice() { if (!synth) return null; const v = synth.getVoices(); return v.find(x => /^es-(419|US|MX)/i.test(x.lang)) || v.find(x => /^es/i.test(x.lang)) || null; }
+      function setBtn(btn, on) { if (!btn) return; btn.classList.toggle('speaking', on); btn.setAttribute('aria-pressed', on ? 'true' : 'false'); const t = btn.querySelector('[data-play]'); if (t) t.textContent = on ? t.getAttribute('data-pause') : t.getAttribute('data-play'); }
+      function speak(text, btn) {
+        if (!synth) { $('#moveNote').textContent = text; return; }
+        if (curBtn === btn) { if (synth.speaking && !synth.paused) { synth.pause(); setBtn(btn, false); return; } if (synth.paused) { synth.resume(); setBtn(btn, true); return; } }
+        synth.cancel(); if (curBtn && curBtn !== btn) setBtn(curBtn, false);
+        const u = new SpeechSynthesisUtterance(text); u.lang = 'es-419'; u.rate = 0.98; const v = pickVoice(); if (v) u.voice = v;
+        u.onend = () => { setBtn(btn, false); if (curBtn === btn) curBtn = null; }; u.onerror = u.onend;
+        curBtn = btn; setBtn(btn, true); synth.speak(u);
+      }
+      function speakOnce(text) { if (!synth) return; synth.cancel(); if (curBtn) { setBtn(curBtn, false); curBtn = null; } const u = new SpeechSynthesisUtterance(text); u.lang = 'es-419'; u.rate = 0.98; const v = pickVoice(); if (v) u.voice = v; synth.speak(u); }
+      window.__labSpeakOnce = speakOnce;
+      $('#instrBtn').addEventListener('click', () => speak(instrText, $('#instrBtn')));
+      if (synth && typeof synth.onvoiceschanged !== 'undefined') synth.onvoiceschanged = pickVoice;
+
+      // exponer para el detener al cambiar de página
+      window.__stopLabAudio = () => { if (synth) synth.cancel(); };
+
+      // init
+      reiniciar();
+    })();
+  </script>
+
+  <!-- ===================== NAVEGACIÓN + PROBLEMAS ===================== -->
+  <script>
+    (() => {
+      'use strict';
+      const $ = (s, r = document) => r.querySelector(s);
+
+      const views = { menu: $('#menu'), lab: $('#panelLab'), prob: $('#panelProb') };
+      function go(name) {
+        Object.entries(views).forEach(([k, elx]) => { if (elx) elx.hidden = (k !== name); });
+        if (window.speechSynthesis) speechSynthesis.cancel();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+      go('menu');
+
+      /* ---------- Generador de cuadrículas (SVG) ---------- */
+      const NS = 'http://www.w3.org/2000/svg';
+      const svgEl = (n, a) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; };
+      const sq = (x, y, s) => [[x, y], [x + s, y], [x + s, y + s], [x, y + s]];
+      const rectP = (x, y, w, h) => [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
+      const trap = (x, y) => [[x, y], [x + 2, y], [x + 1.5, y + 1], [x + 0.5, y + 1]];
+      function scene(cfg) {
+        const cols = cfg.cols, rows = cfg.rows, u = cfg.unit || 24;
+        const ml = 28, mt = 16, mb = 28, mr = 48;
+        const W = ml + cols * u + mr, H = mt + rows * u + mb;
+        const ox = ml, oy = mt + rows * u;
+        const PX = x => ox + x * u, PY = y => oy - y * u;
+        const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'scene', role: 'img', 'aria-label': 'Cuadrícula con figuras' });
+        const txt = (x, y, s, ex) => { const e = svgEl('text', Object.assign({ x, y, 'font-family': 'Arial', 'font-size': 13, 'font-weight': 700, fill: '#12344b' }, ex || {})); e.textContent = s; svg.appendChild(e); };
+        for (let i = 0; i <= cols; i++) svg.appendChild(svgEl('line', { x1: PX(i), y1: PY(0), x2: PX(i), y2: PY(rows), stroke: '#b9cede', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+        for (let j = 0; j <= rows; j++) svg.appendChild(svgEl('line', { x1: PX(0), y1: PY(j), x2: PX(cols), y2: PY(j), stroke: '#b9cede', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+        const xt = PX(cols) + 14, yt = PY(rows) - 14;
+        svg.appendChild(svgEl('line', { x1: PX(0), y1: PY(0), x2: xt, y2: PY(0), stroke: '#1b2b38', 'stroke-width': 2.2 }));
+        svg.appendChild(svgEl('line', { x1: PX(0), y1: PY(0), x2: PX(0), y2: yt, stroke: '#1b2b38', 'stroke-width': 2.2 }));
+        svg.appendChild(svgEl('path', { d: `M${xt} ${PY(0)} l-10 -5 v10 z`, fill: '#1b2b38' }));
+        svg.appendChild(svgEl('path', { d: `M${PX(0)} ${yt} l-5 10 h10 z`, fill: '#1b2b38' }));
+        txt(xt + 8, PY(0), 'este', { 'text-anchor': 'start', 'dominant-baseline': 'middle' });
+        txt(PX(0), yt - 7, 'norte', { 'text-anchor': 'middle' });
+        (cfg.elements || []).forEach(elm => {
+          if (elm.type === 'poly') {
+            svg.appendChild(svgEl('polygon', { points: elm.points.map(p => `${PX(p[0])},${PY(p[1])}`).join(' '), fill: elm.fill || '#c9c9c9', stroke: '#111', 'stroke-width': 2, 'stroke-linejoin': 'round' }));
+            (elm.verts || []).forEach(v => { svg.appendChild(svgEl('circle', { cx: PX(v.x), cy: PY(v.y), r: 3.4, fill: '#111' })); if (v.label) txt(PX(v.x) + (v.dx || 6), PY(v.y) + (v.dy || -6), v.label, { 'font-size': 14, 'font-weight': 800 }); });
+            if (elm.clabel) txt(PX(elm.cx), PY(elm.cy), elm.clabel, { 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': 14, 'font-weight': 800 });
+          } else if (elm.type === 'circle') {
+            svg.appendChild(svgEl('circle', { cx: PX(elm.x), cy: PY(elm.y), r: elm.r * u, fill: 'none', stroke: '#111', 'stroke-width': 2 }));
+            svg.appendChild(svgEl('circle', { cx: PX(elm.x), cy: PY(elm.y), r: 3.4, fill: '#111' }));
+            if (elm.label) txt(PX(elm.x) + (elm.dx || -4), PY(elm.y) + (elm.dy || 15), elm.label, { 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 800 });
+          } else if (elm.type === 'point') {
+            svg.appendChild(svgEl('circle', { cx: PX(elm.x), cy: PY(elm.y), r: 5, fill: '#111' }));
+            if (elm.label) txt(PX(elm.x) + (elm.dx || 7), PY(elm.y) + (elm.dy || -7), elm.label, { 'font-size': 14, 'font-weight': 800 });
+          }
+        });
+        return svg;
+      }
+      // etiquetas de vértices de un cuadrado/rect: sup-izq, sup-der, inf-izq
+      const vTL = (x, y, l) => ({ x, y, label: l, dx: -14, dy: -5 });
+      const vTR = (x, y, l) => ({ x, y, label: l, dx: 6, dy: -5 });
+      const vBL = (x, y, l) => ({ x, y, label: l, dx: -14, dy: 15 });
+      const vBR = (x, y, l) => ({ x, y, label: l, dx: 6, dy: 15 });
+
+      /* ---------- Banco de ítems ---------- */
+      const ITEMS = [
+        // 1) Alfombra — esquina que coincide con Z
+        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una alfombra en la sala de una casa. Además, se muestran tres esquinas de esa alfombra (identificadas con las letras F, G y H) y una marca en el piso de esa sala (identificada con la letra Z). Posteriormente, la alfombra se traslada desde la ubicación actual hacia una nueva ubicación. La nueva ubicación de la alfombra corresponde a 120 cm al oeste y 160 cm al norte. De acuerdo con la información anterior, ¿cuál esquina de la alfombra coincide con la marca del piso de la sala?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 40 cm.',
+          scene: () => scene({ cols: 10, rows: 9, elements: [
+            { type: 'poly', points: sq(5, 2, 1), fill: '#c9c9c9', verts: [vTL(5, 3, 'F'), vTR(6, 3, 'G'), vBL(5, 2, 'H'), { x: 6, y: 2 }] },
+            { type: 'point', x: 2, y: 7, label: 'Z', dx: -14, dy: -5 }
+          ] }),
+          opts: ['F', 'G', 'H', 'Ninguna de las anteriores'], correcta: 0,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir el desplazamiento en cuadros</p>
+            <p>Cada cuadro mide 40 cm. Entonces: 120 cm ÷ 40 cm = <strong>3 cuadros al oeste</strong> y 160 cm ÷ 40 cm = <strong>4 cuadros al norte</strong>.</p>
+            <p class="paso">Paso 2. Trasladar las esquinas</p>
+            <p>Al mover cada esquina 3 cuadros al oeste y 4 cuadros al norte, la esquina <strong>F</strong> cae exactamente sobre la marca <strong>Z</strong>.</p>
+            <p>Por lo tanto, la esquina que coincide con Z es <strong>F</strong>.</p>` },
+
+        // 2) Susan — a dónde llega
+        { enun: `Considere el siguiente sistema de coordenadas referente a la ubicación del banco (B), de la escuela (E), del hospital (H), del supermercado (P) y la ubicación actual de Susan (S). De acuerdo con la información anterior, si desde la ubicación actual de Susan (S) camina 200 m al sur, luego 400 m al oeste y 600 m al norte, entonces ella llega`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 200 m.',
+          scene: () => scene({ cols: 8, rows: 7, elements: [
+            { type: 'point', x: 1, y: 4, label: 'P' }, { type: 'point', x: 4, y: 4, label: 'S' },
+            { type: 'point', x: 2, y: 6, label: 'B' }, { type: 'point', x: 6, y: 6, label: 'H' },
+            { type: 'point', x: 5, y: 2, label: 'E' }
+          ] }),
+          opts: ['al banco', 'a la escuela', 'al supermercado', 'al hospital'], correcta: 0,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir cada tramo en cuadros (cada cuadro = 200 m)</p>
+            <p>200 m ÷ 200 = 1 al sur; 400 m ÷ 200 = 2 al oeste; 600 m ÷ 200 = 3 al norte.</p>
+            <p class="paso">Paso 2. Seguir el recorrido desde S</p>
+            <p>Desde S se baja 1, se avanza 2 a la izquierda y se sube 3. Se llega al punto <strong>B</strong>.</p>
+            <p>Por lo tanto, ella llega <strong>al banco</strong>.</p>` },
+
+        // 3) Piscina circular
+        { enun: `Considere el siguiente sistema de coordenadas referente a la ubicación de la piscina circular de centro A que le compró David a su hijo, ubicada en el patio de la casa el día lunes. De acuerdo con la información anterior, si David el día sábado trasladó la piscina 8 metros al este y 4 metros al sur (considere el centro de la circunferencia cuando se indica que se trasladó la piscina), ¿cuál es la circunferencia que representa la ubicación de la piscina el día sábado?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 2 m.',
+          scene: () => scene({ cols: 10, rows: 9, elements: [
+            { type: 'circle', x: 3, y: 6, r: 1, label: 'K' }, { type: 'circle', x: 5, y: 5, r: 1, label: 'E' },
+            { type: 'circle', x: 2, y: 4, r: 1, label: 'A' }, { type: 'circle', x: 6, y: 2, r: 1, label: 'H' }
+          ] }),
+          opts: ['Circunferencia de centro K', 'Circunferencia de centro E', 'Circunferencia de centro H', 'Ninguna de las anteriores'], correcta: 2,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir el desplazamiento en cuadros (cada cuadro = 2 m)</p>
+            <p>8 m ÷ 2 = 4 al este; 4 m ÷ 2 = 2 al sur.</p>
+            <p class="paso">Paso 2. Trasladar el centro A</p>
+            <p>Al mover el centro A cuatro cuadros al este y dos al sur, coincide con el centro <strong>H</strong>.</p>
+            <p>Por lo tanto, la piscina el sábado es la <strong>circunferencia de centro H</strong>.</p>` },
+
+        // 4) Botes (trapecios)
+        { enun: `Considere el siguiente sistema de coordenadas referente a la ubicación actual de los botes, identificados con S, M, P y R. Además, durante una misma hora cada uno de esos botes se traslada desde la ubicación actual hacia una nueva ubicación. De acuerdo con la información anterior, si durante esa hora la traslación de S corresponde a 6 m al este y 9 m al sur, entonces la nueva ubicación de S coincide con la que tenía`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 3 m.',
+          scene: () => scene({ cols: 9, rows: 8, elements: [
+            { type: 'poly', points: trap(1, 1), clabel: 'M', cx: 2, cy: 1.5 },
+            { type: 'poly', points: trap(5, 1), clabel: 'P', cx: 6, cy: 1.5 },
+            { type: 'poly', points: trap(3, 4), clabel: 'S', cx: 4, cy: 4.5 },
+            { type: 'poly', points: trap(6, 6), clabel: 'R', cx: 7, cy: 6.5 }
+          ] }),
+          opts: ['M', 'P', 'R', 'Ninguna de las anteriores'], correcta: 1,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir el desplazamiento en cuadros (cada cuadro = 3 m)</p>
+            <p>6 m ÷ 3 = 2 al este; 9 m ÷ 3 = 3 al sur.</p>
+            <p class="paso">Paso 2. Trasladar el bote S</p>
+            <p>Al mover S dos cuadros al este y tres al sur, coincide con la ubicación de <strong>P</strong>.</p>
+            <p>Por lo tanto, la nueva ubicación de S coincide con la que tenía <strong>P</strong>.</p>` },
+
+        // 5) Casas — a dónde llega Ana
+        { enun: `Considere el siguiente sistema de coordenadas referente a la ubicación de la casa de Ana (A), de Jorge (J), de Guillermo (G), de Rocío (R) y de Tatiana (T). De acuerdo con la información anterior, si Ana (A) sale de su casa y camina 300 m al este y 200 m al norte, entonces, ella llega a la casa de`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 100 m.',
+          scene: () => scene({ cols: 8, rows: 8, elements: [
+            { type: 'point', x: 1, y: 3, label: 'A' }, { type: 'point', x: 3, y: 6, label: 'J' },
+            { type: 'point', x: 4, y: 5, label: 'T' }, { type: 'point', x: 5, y: 3, label: 'G' },
+            { type: 'point', x: 3, y: 1, label: 'R' }
+          ] }),
+          opts: ['Jorge.', 'Rocío.', 'Tatiana.', 'Guillermo.'], correcta: 2,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir cada tramo en cuadros (cada cuadro = 100 m)</p>
+            <p>300 m ÷ 100 = 3 al este; 200 m ÷ 100 = 2 al norte.</p>
+            <p class="paso">Paso 2. Seguir el recorrido desde A</p>
+            <p>Desde A se avanza 3 a la derecha y 2 hacia arriba, y se llega al punto <strong>T</strong>.</p>
+            <p>Por lo tanto, ella llega a la casa de <strong>Tatiana</strong>.</p>` },
+
+        // ---- Similares nuevos ----
+        // N1) Baldosa — esquina que coincide con M
+        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una baldosa cuadrada en el patio de una casa. Se muestran tres esquinas de esa baldosa (identificadas con P, Q y R) y una marca en el piso (identificada con M). Posteriormente, la baldosa se traslada hacia una nueva ubicación que corresponde a 120 cm al este y 180 cm al sur. De acuerdo con la información anterior, ¿cuál esquina de la baldosa coincide con la marca M?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 60 cm.',
+          scene: () => scene({ cols: 9, rows: 8, elements: [
+            { type: 'poly', points: sq(2, 5, 1), fill: '#c9c9c9', verts: [vTL(2, 6, 'P'), vTR(3, 6, 'Q'), vBL(2, 5, 'R'), { x: 3, y: 5 }] },
+            { type: 'point', x: 5, y: 3, label: 'M', dx: 7, dy: -6 }
+          ] }),
+          opts: ['P', 'Q', 'R', 'Ninguna de las anteriores'], correcta: 1,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir el desplazamiento en cuadros (cada cuadro = 60 cm)</p>
+            <p>120 cm ÷ 60 = 2 al este; 180 cm ÷ 60 = 3 al sur.</p>
+            <p class="paso">Paso 2. Trasladar las esquinas</p>
+            <p>Al mover cada esquina 2 al este y 3 al sur, la esquina <strong>Q</strong> cae sobre la marca <strong>M</strong>.</p>
+            <p>Por lo tanto, la esquina que coincide con M es <strong>Q</strong>.</p>` },
+
+        // N2) Marco camina
+        { enun: `Considere el siguiente sistema de coordenadas referente a la ubicación de la biblioteca (B), la farmacia (F), el parque (P), el cine (C) y la ubicación actual de Marco (M). De acuerdo con la información anterior, si desde su ubicación actual Marco (M) camina 300 m al norte y luego 450 m al este, entonces él llega`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 150 m.',
+          scene: () => scene({ cols: 8, rows: 7, elements: [
+            { type: 'point', x: 1, y: 1, label: 'M' }, { type: 'point', x: 3, y: 5, label: 'B' },
+            { type: 'point', x: 6, y: 4, label: 'F' }, { type: 'point', x: 2, y: 4, label: 'P' },
+            { type: 'point', x: 4, y: 3, label: 'C' }
+          ] }),
+          opts: ['a la biblioteca', 'a la farmacia', 'al cine', 'al parque'], correcta: 2,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir cada tramo en cuadros (cada cuadro = 150 m)</p>
+            <p>300 m ÷ 150 = 2 al norte; 450 m ÷ 150 = 3 al este.</p>
+            <p class="paso">Paso 2. Seguir el recorrido desde M</p>
+            <p>Desde M se sube 2 y se avanza 3 a la derecha, y se llega al punto <strong>C</strong>.</p>
+            <p>Por lo tanto, él llega <strong>al cine</strong>.</p>` },
+
+        // N3) Fuente circular
+        { enun: `Considere el siguiente sistema de coordenadas referente a la ubicación de una fuente circular de centro A ubicada en una plaza. De acuerdo con la información anterior, si la fuente se traslada 15 m al oeste y 10 m al norte (considere el centro de la circunferencia), ¿cuál es la circunferencia que representa la nueva ubicación de la fuente?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 5 m.',
+          scene: () => scene({ cols: 9, rows: 8, elements: [
+            { type: 'circle', x: 6, y: 2, r: 1, label: 'A' }, { type: 'circle', x: 2, y: 2, r: 1, label: 'M' },
+            { type: 'circle', x: 4, y: 6, r: 1, label: 'N' }, { type: 'circle', x: 3, y: 4, r: 1, label: 'T' }
+          ] }),
+          opts: ['Circunferencia de centro M', 'Circunferencia de centro N', 'Circunferencia de centro T', 'Ninguna de las anteriores'], correcta: 2,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir el desplazamiento en cuadros (cada cuadro = 5 m)</p>
+            <p>15 m ÷ 5 = 3 al oeste; 10 m ÷ 5 = 2 al norte.</p>
+            <p class="paso">Paso 2. Trasladar el centro A</p>
+            <p>Al mover el centro A tres cuadros al oeste y dos al norte, coincide con el centro <strong>T</strong>.</p>
+            <p>Por lo tanto, la nueva ubicación es la <strong>circunferencia de centro T</strong>.</p>` },
+
+        // N4) Alfombras rectangulares
+        { enun: `Considere el siguiente sistema de coordenadas referente a la ubicación actual de cuatro alfombras rectangulares iguales, identificadas con D, E, F y G. De acuerdo con la información anterior, si la alfombra D se traslada 4 m al este y 6 m al sur, entonces su nueva ubicación coincide con la que tenía`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 2 m.',
+          scene: () => scene({ cols: 9, rows: 8, elements: [
+            { type: 'poly', points: rectP(1, 5, 2, 1), fill: '#c9c9c9', clabel: 'D', cx: 2, cy: 5.5 },
+            { type: 'poly', points: rectP(3, 2, 2, 1), fill: '#c9c9c9', clabel: 'E', cx: 4, cy: 2.5 },
+            { type: 'poly', points: rectP(5, 5, 2, 1), fill: '#c9c9c9', clabel: 'F', cx: 6, cy: 5.5 },
+            { type: 'poly', points: rectP(6, 1, 2, 1), fill: '#c9c9c9', clabel: 'G', cx: 7, cy: 1.5 }
+          ] }),
+          opts: ['E', 'F', 'G', 'Ninguna de las anteriores'], correcta: 0,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir el desplazamiento en cuadros (cada cuadro = 2 m)</p>
+            <p>4 m ÷ 2 = 2 al este; 6 m ÷ 2 = 3 al sur.</p>
+            <p class="paso">Paso 2. Trasladar la alfombra D</p>
+            <p>Al mover D dos cuadros al este y tres al sur, coincide con la ubicación de <strong>E</strong>.</p>
+            <p>Por lo tanto, su nueva ubicación coincide con la que tenía <strong>E</strong>.</p>` }
+      ];
+
+      const keys = ['A', 'B', 'C', 'D'];
+      function printItem(card) {
+        const w = window.open('', '_blank', 'width=820,height=1000'); if (!w) { alert('Permite las ventanas emergentes para imprimir el ítem.'); return; }
+        const clone = card.cloneNode(true); clone.querySelectorAll('.item-actions').forEach(e => e.remove());
+        const css = `body{font-family:Arial,Helvetica,sans-serif;font-size:12pt;color:#111;margin:24px;line-height:1.5;} .num{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:50%;background:#123a5a;color:#fff;font-weight:800;margin-right:6px;} .scene{display:block;width:340px;height:auto;margin:10px auto;} .opt,.opt-scene{display:block;border:1px solid #999;border-radius:8px;padding:8px 12px;margin:6px 0;} .key{font-weight:800;} .mark{display:none;} .fb{display:none;} .solucion{border-left:4px solid #d9a406;background:#fffdf5;padding:10px 12px;border-radius:0 8px 8px 0;margin-top:10px;} .paso{font-weight:800;margin:8px 0 2px;} sup{font-size:.72em;}`;
+        w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Ítem</title><style>${css}</style></head><body>${clone.outerHTML}</body></html>`);
+        w.document.close(); w.focus(); setTimeout(() => { try { w.print(); } catch (e) {} }, 400);
+      }
+      async function pdfItem(card) {
+        const jsPDFctor = window.jspdf && window.jspdf.jsPDF;
+        if (jsPDFctor && window.html2canvas) {
+          const acts = card.querySelector('.item-actions');
+          try { if (acts) acts.style.visibility = 'hidden'; const canvas = await window.html2canvas(card, { scale: 2, backgroundColor: '#ffffff' }); if (acts) acts.style.visibility = '';
+            const pdf = new jsPDFctor('p', 'mm', 'a4'); const pw = pdf.internal.pageSize.getWidth() - 20; const ph = canvas.height * pw / canvas.width;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 10, pw, ph); pdf.save('item-traslacion.pdf'); return;
+          } catch (e) { if (acts) acts.style.visibility = ''; }
+        }
+        printItem(card);
+      }
+
+      const wrap = $('#itemsWrap');
+      let lastIdx = -1, count = 0;
+      function placeholder() {
+        wrap.innerHTML = '<div class="placeholder">Los ítems de esta sección se agregarán próximamente.</div>';
+      }
+      function renderItem(it, dispNum) {
+        const card = document.createElement('div'); card.className = 'item';
+        const en = document.createElement('p'); en.className = 'enun'; en.innerHTML = `<span class="num">${dispNum}</span>${it.enun}`; card.appendChild(en);
+        if (it.scene) card.appendChild(it.scene());
+        if (it.nota) { const nb = document.createElement('div'); nb.className = 'nota'; nb.textContent = it.nota; card.appendChild(nb); }
+        const fb = document.createElement('p'); fb.className = 'fb'; fb.style.display = 'none';
+        const sol = document.createElement('div'); sol.className = 'solucion'; sol.hidden = true; sol.innerHTML = it.sol || '';
+        const optButtons = [];
+        const optsWrap = document.createElement('div'); optsWrap.className = it.tipo === 'graf' ? 'opts-graf' : 'opts';
+        (it.opts || []).forEach((o, i) => {
+          const b = document.createElement('button'); b.type = 'button'; b.className = it.tipo === 'graf' ? 'opt opt-scene' : 'opt';
+          if (it.tipo === 'graf') { const h = document.createElement('div'); h.className = 'ohead'; h.innerHTML = `<span class="key">${keys[i]})</span><span class="mark"></span>`; b.appendChild(h); b.appendChild(o()); }
+          else { b.innerHTML = `<span class="key">${keys[i]})</span><span class="otext">${o}</span><span class="mark"></span>`; }
+          optsWrap.appendChild(b); optButtons.push(b);
+        });
+        card.appendChild(optsWrap); card.appendChild(fb); card.appendChild(sol);
+        const acts = document.createElement('div'); acts.className = 'item-actions';
+        const bp = document.createElement('button'); bp.type = 'button'; bp.className = 'act-btn'; bp.innerHTML = '🖨 Imprimir';
+        const bd = document.createElement('button'); bd.type = 'button'; bd.className = 'act-btn'; bd.innerHTML = '⬇ Descargar PDF';
+        acts.appendChild(bp); acts.appendChild(bd); card.appendChild(acts);
+        bp.addEventListener('click', () => printItem(card)); bd.addEventListener('click', () => pdfItem(card));
+        optButtons.forEach((b, i) => b.addEventListener('click', () => {
+          optButtons.forEach(x => { x.classList.remove('correct', 'wrong'); const m = x.querySelector('.mark'); if (m) m.textContent = ''; });
+          if (i === it.correcta) { b.classList.add('correct'); const m = b.querySelector('.mark'); if (m) m.textContent = '✓'; fb.style.display = 'block'; fb.className = 'fb ok'; fb.textContent = '¡Correcto!'; sol.hidden = true; }
+          else { b.classList.add('wrong'); const m = b.querySelector('.mark'); if (m) m.textContent = '✗'; const cb = optButtons[it.correcta]; cb.classList.add('correct'); const cm = cb.querySelector('.mark'); if (cm) cm.textContent = '✓'; fb.style.display = 'block'; fb.className = 'fb no'; fb.textContent = 'Respuesta incorrecta. Revisa la solución paso a paso:'; sol.hidden = false; }
+        }));
+        return card;
+      }
+      function nuevoItem() {
+        if (!ITEMS.length) { placeholder(); return; }
+        let i; if (ITEMS.length <= 1) i = 0; else { do { i = Math.floor(Math.random() * ITEMS.length); } while (i === lastIdx); }
+        lastIdx = i; count++; wrap.innerHTML = ''; wrap.appendChild(renderItem(ITEMS[i], count));
+      }
+      $('#btnNuevo').addEventListener('click', nuevoItem);
+      nuevoItem();
+    })();
+  </script>
+</body>
+</html>

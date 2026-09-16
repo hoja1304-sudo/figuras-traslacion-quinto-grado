@@ -559,16 +559,24 @@
         const txt = (x, y, s, ex) => { const e = svgEl('text', Object.assign({ x, y, 'font-family': 'Arial', 'font-size': 13, 'font-weight': 700, fill: '#12344b' }, ex || {})); e.textContent = s; svg.appendChild(e); };
         for (let i = 0; i <= cols; i++) svg.appendChild(svgEl('line', { x1: PX(i), y1: PY(0), x2: PX(i), y2: PY(rows), stroke: '#b9cede', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
         for (let j = 0; j <= rows; j++) svg.appendChild(svgEl('line', { x1: PX(0), y1: PY(j), x2: PX(cols), y2: PY(j), stroke: '#b9cede', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
-        const xt = PX(cols) + 14, yt = PY(rows) - 14;
-        svg.appendChild(svgEl('line', { x1: PX(0), y1: PY(0), x2: xt, y2: PY(0), stroke: '#1b2b38', 'stroke-width': 2.2 }));
-        svg.appendChild(svgEl('line', { x1: PX(0), y1: PY(0), x2: PX(0), y2: yt, stroke: '#1b2b38', 'stroke-width': 2.2 }));
-        svg.appendChild(svgEl('path', { d: `M${xt} ${PY(0)} l-10 -5 v10 z`, fill: '#1b2b38' }));
-        svg.appendChild(svgEl('path', { d: `M${PX(0)} ${yt} l-5 10 h10 z`, fill: '#1b2b38' }));
-        txt(xt + 8, PY(0), 'este', { 'text-anchor': 'start', 'dominant-baseline': 'middle' });
-        txt(PX(0), yt - 7, 'norte', { 'text-anchor': 'middle' });
+        if (!cfg.plain) {
+          const yt = PY(rows) - 14, xt = PX(cols) + 14;
+          const xEnd = cfg.numbers ? PX(cols) : xt;
+          svg.appendChild(svgEl('line', { x1: PX(0), y1: PY(0), x2: xEnd, y2: PY(0), stroke: '#1b2b38', 'stroke-width': 2.2 }));
+          svg.appendChild(svgEl('line', { x1: PX(0), y1: PY(0), x2: PX(0), y2: yt, stroke: '#1b2b38', 'stroke-width': 2.2 }));
+          svg.appendChild(svgEl('path', { d: `M${PX(0)} ${yt} l-5 10 h10 z`, fill: '#1b2b38' }));
+          if (cfg.numbers) {
+            for (let i = 0; i <= cols; i++) txt(PX(i), PY(0) + 17, String(i), { 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700 });
+            for (let j = 1; j <= rows; j++) txt(PX(0) - 8, PY(j) + 4, String(j), { 'text-anchor': 'end', 'font-size': 12, 'font-weight': 700 });
+          } else {
+            svg.appendChild(svgEl('path', { d: `M${xEnd} ${PY(0)} l-10 -5 v10 z`, fill: '#1b2b38' }));
+            txt(xEnd + 8, PY(0), 'este', { 'text-anchor': 'start', 'dominant-baseline': 'middle' });
+            txt(PX(0), yt - 7, 'norte', { 'text-anchor': 'middle' });
+          }
+        }
         (cfg.elements || []).forEach(elm => {
           if (elm.type === 'poly') {
-            svg.appendChild(svgEl('polygon', { points: elm.points.map(p => `${PX(p[0])},${PY(p[1])}`).join(' '), fill: elm.fill || '#c9c9c9', stroke: '#111', 'stroke-width': 2, 'stroke-linejoin': 'round' }));
+            svg.appendChild(svgEl('polygon', { points: elm.points.map(p => `${PX(p[0])},${PY(p[1])}`).join(' '), fill: elm.fill || '#c9c9c9', stroke: elm.stroke || '#111', 'stroke-width': 2, 'stroke-linejoin': 'round' }));
             (elm.verts || []).forEach(v => { svg.appendChild(svgEl('circle', { cx: PX(v.x), cy: PY(v.y), r: 3.4, fill: '#111' })); if (v.label) txt(PX(v.x) + (v.dx || 6), PY(v.y) + (v.dy || -6), v.label, { 'font-size': 14, 'font-weight': 800 }); });
             if (elm.clabel) txt(PX(elm.cx), PY(elm.cy), elm.clabel, { 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': 14, 'font-weight': 800 });
           } else if (elm.type === 'circle') {
@@ -916,37 +924,75 @@
               verts: [ { x: 9, y: 6, label: 'P', dx: -14, dy: -5 }, { x: 10, y: 6, label: 'Q', dx: 6, dy: -5 },
                        { x: 10, y: 5 }, { x: 11, y: 5 }, { x: 11, y: 4 }, { x: 9, y: 4, label: 'R', dx: -14, dy: 15 } ] },
             { type: 'point', x: 2, y: 7, label: 'M', dx: 7, dy: -6 }
-          ] }) }
+          ] }) },
+
+        { tipo: 'abierta', unidad: 'm²', answer: 23, pregunta: 'Escribe el área del terreno (en m²)',
+          enun: `A la escuela El Porvenir se le aprueba realizar la construcción de sus instalaciones, pero solo cuentan con un terreno con forma de polígono irregular para la construcción de las instalaciones. Colabore con la junta de educación y determine el área con la que cuenta el terreno.`,
+          nota: 'Cada cuadrado de la cuadrícula mide 1 m².',
+          fuente: 'Cuadernillo de preparación para estudiantes. Olimpiada Nacional de Matemática para Quinto Año. Asesoría Nacional de Matemática. OLCOMEP_2017_5_Estudiante.',
+          scene: () => scene({ cols: 12, rows: 8, plain: true, elements: [
+            { type: 'poly', points: [[1, 3], [4, 3], [4, 1], [10, 4], [4, 7], [4, 5], [1, 5], [2, 4]], fill: 'rgba(90,130,190,.55)', stroke: '#2c4a7c' }
+          ] }),
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Descompón la figura en partes conocidas</p>
+            <p>• Triángulo (la punta): base 6 y altura 6 → área = (6 × 6) ÷ 2 = <strong>18 m²</strong>.</p>
+            <p>• Rectángulo (el cuerpo): 3 × 2 = <strong>6 m²</strong>.</p>
+            <p>• Se resta la muesca triangular de la izquierda: (2 × 1) ÷ 2 = <strong>1 m²</strong>.</p>
+            <p class="paso">Suma las áreas</p>
+            <p>18 + 6 − 1 = <strong>23 m²</strong>. El terreno tiene un área de <strong>23 m²</strong>.</p>` },
+
+        { tipo: 'abierta', unidad: 'unidades²', answer: 7, pregunta: 'Escribe el área de la figura trasladada',
+          enun: `Utilice el siguiente sistema de coordenadas. a) Dibuje la figura que tiene como vértices los puntos (2, 0), (1, 4) y (5, 2). b) Dibuje una nueva figura que corresponda a una traslación de la figura anterior, trasladándola tres unidades a la derecha y cuatro hacia arriba. c) Calcule el área de la figura trasladada.`,
+          nota: 'Cada cuadrado de la cuadrícula mide 1 unidad².',
+          fuente: 'Cuadernillo de preparación para estudiantes. Olimpiada Nacional de Matemática para Quinto Año. Asesoría Nacional de Matemática. OLCOMEP_2017_5_Estudiante.',
+          scene: () => scene({ cols: 9, rows: 9, numbers: true, elements: [] }),
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">a) Figura original</p>
+            <p>Triángulo con vértices (2, 0), (1, 4) y (5, 2).</p>
+            <p class="paso">b) Traslación (3 a la derecha y 4 hacia arriba)</p>
+            <p>Se suma (3, 4) a cada vértice: (2, 0) → (5, 4); (1, 4) → (4, 8); (5, 2) → (8, 6).</p>
+            <p class="paso">c) Área de la figura trasladada</p>
+            <p>La traslación no cambia el tamaño de la figura, así que su área es la misma que la del triángulo original.</p>
+            <p>Encerrando el triángulo en un rectángulo de 4 × 4 = 16 y restando los tres triángulos de las esquinas (2 + 3 + 4 = 9), el área es 16 − 9 = <strong>7 unidades²</strong>.</p>` }
       ];
 
       function renderNivel(it, num) {
-        const rF = it.path[it.path.length - 1];
-        const target = { dx: it.M[0] - rF[0], dy: it.M[1] - rF[1] };
+        const abierta = it.tipo === 'abierta';
+        let target = null;
         const card = document.createElement('div'); card.className = 'item';
         const en = document.createElement('p'); en.className = 'enun'; en.innerHTML = `<span class="num">${num}</span>${it.enun}`; card.appendChild(en);
         if (it.scene) card.appendChild(it.scene());
         if (it.nota) { const nb = document.createElement('div'); nb.className = 'nota'; nb.textContent = it.nota; card.appendChild(nb); }
         const ans = document.createElement('div'); ans.className = 'nivel-ans';
-        ans.innerHTML = `<h4>Indica la traslación para que ${it.track} coincida con M</h4>
-          <div class="ci-grid">${['norte', 'sur', 'este', 'oeste'].map(d =>
-            `<div class="ci"><span class="ci-name">${d[0].toUpperCase() + d.slice(1)}</span><span class="stepper"><button type="button" data-step="-1" data-for="${d}">−</button><input type="number" min="0" value="0" data-dir="${d}"><button type="button" data-step="1" data-for="${d}">+</button></span></div>`).join('')}</div>`;
+        if (abierta) {
+          ans.innerHTML = `<h4>${it.pregunta || 'Escribe tu respuesta'}</h4>
+            <div class="open-ans"><input type="number" step="any" inputmode="decimal" data-open placeholder="0"><span class="open-unit">${it.unidad || ''}</span></div>`;
+        } else {
+          const rF = it.path[it.path.length - 1]; target = { dx: it.M[0] - rF[0], dy: it.M[1] - rF[1] };
+          ans.innerHTML = `<h4>Indica la traslación para que ${it.track} coincida con M</h4>
+            <div class="ci-grid">${['norte', 'sur', 'este', 'oeste'].map(d =>
+              `<div class="ci"><span class="ci-name">${d[0].toUpperCase() + d.slice(1)}</span><span class="stepper"><button type="button" data-step="-1" data-for="${d}">−</button><input type="number" min="0" value="0" data-dir="${d}"><button type="button" data-step="1" data-for="${d}">+</button></span></div>`).join('')}</div>`;
+        }
         card.appendChild(ans);
         const comp = document.createElement('button'); comp.type = 'button'; comp.className = 'comprobar'; comp.textContent = 'Comprobar'; card.appendChild(comp);
         const fb = document.createElement('p'); fb.className = 'fb'; fb.style.display = 'none';
-        const sol = document.createElement('div'); sol.className = 'solucion'; sol.hidden = true; sol.innerHTML = nivelSol(it.track, it.slideDesc, it.path, it.M, target, it.giroDir);
+        const sol = document.createElement('div'); sol.className = 'solucion'; sol.hidden = true;
+        sol.innerHTML = abierta ? it.sol : nivelSol(it.track, it.slideDesc, it.path, it.M, target, it.giroDir);
         card.appendChild(fb); card.appendChild(sol);
+        if (it.fuente) { const f = document.createElement('p'); f.className = 'fuente'; f.textContent = 'Fuente: ' + it.fuente; card.appendChild(f); }
         const acts = document.createElement('div'); acts.className = 'item-actions';
         const bp = document.createElement('button'); bp.type = 'button'; bp.className = 'act-btn'; bp.innerHTML = '🖨 Imprimir';
         const bd = document.createElement('button'); bd.type = 'button'; bd.className = 'act-btn'; bd.innerHTML = '⬇ Descargar PDF';
         acts.appendChild(bp); acts.appendChild(bd); card.appendChild(acts);
         bp.addEventListener('click', () => printItem(card)); bd.addEventListener('click', () => pdfItem(card));
-        ans.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', () => {
+        if (!abierta) ans.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', () => {
           const inp = ans.querySelector(`input[data-dir="${b.dataset.for}"]`); let v = (+inp.value || 0) + (+b.dataset.step); if (v < 0) v = 0; inp.value = v;
         }));
         comp.addEventListener('click', () => {
-          const g = n => +ans.querySelector(`input[data-dir="${n}"]`).value || 0;
-          const dx = g('este') - g('oeste'), dy = g('norte') - g('sur');
-          if (dx === target.dx && dy === target.dy) { fb.style.display = 'block'; fb.className = 'fb ok'; fb.textContent = '🎉 ¡Excelente! Resolviste el reto correctamente.'; sol.hidden = true; }
+          let correct;
+          if (abierta) { const v = parseFloat(ans.querySelector('[data-open]').value); correct = isFinite(v) && Math.abs(v - it.answer) < 1e-9; }
+          else { const g = n => +ans.querySelector(`input[data-dir="${n}"]`).value || 0; correct = (g('este') - g('oeste')) === target.dx && (g('norte') - g('sur')) === target.dy; }
+          if (correct) { fb.style.display = 'block'; fb.className = 'fb ok'; fb.textContent = '🎉 ¡Excelente! Resolviste el reto correctamente.'; sol.hidden = true; }
           else { fb.style.display = 'block'; fb.className = 'fb no'; fb.textContent = 'Aún no es correcto. Revisa la solución paso a paso:'; sol.hidden = false; }
         });
         return card;

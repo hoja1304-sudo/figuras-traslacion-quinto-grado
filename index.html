@@ -529,7 +529,7 @@
       const trap = (x, y) => [[x, y], [x + 2, y], [x + 1.5, y + 1], [x + 0.5, y + 1]];
       function scene(cfg) {
         const cols = cfg.cols, rows = cfg.rows, u = cfg.unit || 24;
-        const ml = 28, mt = 16, mb = 28, mr = 48;
+        const ml = 28, mt = 34, mb = 28, mr = 48;
         const W = ml + cols * u + mr, H = mt + rows * u + mb;
         const ox = ml, oy = mt + rows * u;
         const PX = x => ox + x * u, PY = y => oy - y * u;

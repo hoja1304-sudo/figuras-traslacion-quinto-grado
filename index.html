@@ -709,7 +709,24 @@
             <p>4 m ÷ 2 = 2 al este; 6 m ÷ 2 = 3 al sur.</p>
             <p class="paso">Paso 2. Trasladar la alfombra D</p>
             <p>Al mover D dos cuadros al este y tres al sur, coincide con la ubicación de <strong>E</strong>.</p>
-            <p>Por lo tanto, su nueva ubicación coincide con la que tenía <strong>E</strong>.</p>` }
+            <p>Por lo tanto, su nueva ubicación coincide con la que tenía <strong>E</strong>.</p>` },
+
+        // N5) Pieza en forma de L — esquina que coincide con M (cuatro letras)
+        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una pieza en forma de L en el patio de una casa. Se muestran cuatro esquinas de esa pieza (identificadas con P, Q, R y S) y una marca en el piso (identificada con M). Posteriormente, la pieza se traslada hacia una nueva ubicación que corresponde a 120 cm al este y 180 cm al sur. De acuerdo con la información anterior, ¿cuál esquina de la pieza coincide con la marca M?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 60 cm.',
+          scene: () => scene({ cols: 9, rows: 9, elements: [
+            { type: 'poly', points: [[2, 7], [3, 7], [3, 6], [4, 6], [4, 5], [2, 5]], fill: '#c9c9c9',
+              verts: [ { x: 2, y: 7, label: 'P', dx: -14, dy: -5 }, { x: 4, y: 6, label: 'Q', dx: 6, dy: -5 },
+                       { x: 4, y: 5, label: 'R', dx: 6, dy: 15 }, { x: 2, y: 5, label: 'S', dx: -14, dy: 15 } ] },
+            { type: 'point', x: 6, y: 3, label: 'M', dx: 7, dy: -6 }
+          ] }),
+          opts: ['P', 'Q', 'R', 'S'], correcta: 1,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir el desplazamiento en cuadros (cada cuadro = 60 cm)</p>
+            <p>120 cm ÷ 60 = 2 al este; 180 cm ÷ 60 = 3 al sur.</p>
+            <p class="paso">Paso 2. Trasladar las esquinas</p>
+            <p>Al mover cada esquina 2 cuadros al este y 3 cuadros al sur, la esquina <strong>Q</strong> cae exactamente sobre la marca <strong>M</strong>.</p>
+            <p>Por lo tanto, la esquina que coincide con M es <strong>Q</strong>.</p>` }
       ];
 
       const keys = ['A', 'B', 'C', 'D'];

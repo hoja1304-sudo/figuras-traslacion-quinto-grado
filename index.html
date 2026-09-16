@@ -862,47 +862,60 @@
       nuevoItem();
 
       /* ---------- Nivel+ (retos olímpicos: rodar la figura) ---------- */
-      function nivelSol(path, giros, M, target) {
-        const rF = path[path.length - 1];
-        const pathStr = path.map(p => `(${p[0]}, ${p[1]})`).join(' → ');
+      function nivelSol(track, slideDesc, path, M, target, giroDir) {
+        giroDir = giroDir || 'este';
+        const pivote = giroDir === 'oeste' ? 'izquierdo' : 'derecho';
+        const rF = path[path.length - 1], p0 = path[0], p1 = path[1];
+        const girosStr = path.slice(1).map(p => `(${p[0]}, ${p[1]})`).join(' → ');
         const dxs = target.dx > 0 ? `${target.dx} al este` : target.dx < 0 ? `${-target.dx} al oeste` : '';
         const dys = target.dy > 0 ? `${target.dy} al norte` : target.dy < 0 ? `${-target.dy} al sur` : '';
         const ans = [dxs, dys].filter(Boolean).join(' y ') || 'ninguna (ya coincide)';
         return `<h4>Solución paso a paso</h4>
-          <p class="paso">Paso 1. Seguir el vértice R mientras la figura rueda</p>
-          <p>Cada giro es una rotación de 90° apoyándose en el vértice inferior derecho, así la figura avanza hacia el este y sus vértices caen sobre los vértices de la cuadrícula.</p>
-          <p>Contando los cuadros desde el origen, el vértice R pasa por: <strong>${pathStr}</strong>.</p>
-          <p>Después de ${giros} giros, el vértice R queda en <strong>(${rF[0]}, ${rF[1]})</strong>.</p>
-          <p class="paso">Paso 2. Trasladar R hasta la marca M</p>
+          <p class="paso">Paso 1. Trasladar la figura</p>
+          <p>Contando los cuadros desde el origen, el vértice ${track} está en <strong>(${p0[0]}, ${p0[1]})</strong>. Al trasladar la figura ${slideDesc}, el vértice ${track} pasa a <strong>(${p1[0]}, ${p1[1]})</strong>.</p>
+          <p class="paso">Paso 2. Dar los dos giros de 90°</p>
+          <p>Cada giro es una rotación de 90° apoyándose en el vértice inferior ${pivote} (la figura rueda hacia el ${giroDir}). El vértice ${track} pasa por: <strong>${girosStr}</strong>.</p>
+          <p>Después de la traslación y los dos giros, el vértice ${track} queda en <strong>(${rF[0]}, ${rF[1]})</strong>.</p>
+          <p class="paso">Paso 3. Trasladar ${track} hasta la marca M</p>
           <p>La marca M está en (${M[0]}, ${M[1]}). Desde (${rF[0]}, ${rF[1]}) hasta (${M[0]}, ${M[1]}): en x, ${target.dx === 0 ? 'no cambia' : Math.abs(target.dx) + (target.dx > 0 ? ' al este' : ' al oeste')}; en y, ${target.dy === 0 ? 'no cambia' : Math.abs(target.dy) + (target.dy > 0 ? ' al norte' : ' al sur')}.</p>
           <p>Por lo tanto, la traslación es <strong>${ans}</strong>.</p>`;
       }
 
       const NIVEL = [
-        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una baldosa cuadrada en el patio de una casa. Se muestran tres esquinas de esa baldosa (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si hacemos girar la baldosa en la dirección este, paralelo al eje este, de tal forma que cada giro ubique los vértices de la baldosa perfectamente sobre los vértices de la siguiente cuadrícula, y realizamos ese movimiento cinco veces, ¿cuál sería la traslación que se debe realizar para que el vértice R, en su nueva posición, coincida con la marca M del piso?`,
+        { track: 'Q', slideDesc: '3 unidades al este', path: [[2, 5], [5, 5], [6, 4], [6, 4]], M: [9, 7],
+          enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una baldosa cuadrada en el patio de una casa. Se muestran tres esquinas de esa baldosa (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si la baldosa se traslada 3 unidades al este y luego da dos giros de 90° (rodando hacia el este, de modo que en cada giro sus vértices caen sobre los vértices de la cuadrícula), ¿cuál es la traslación que debe realizar el vértice Q, en su nueva posición, para que coincida con la marca M del piso?`,
           nota: 'La medida del lado de cada cuadrado de la cuadrícula es 60 cm.',
-          giros: 5, path: [[1, 3], [2, 4], [4, 4], [5, 3], [5, 3], [6, 4]], M: [8, 3],
-          scene: () => scene({ cols: 10, rows: 7, elements: [
-            { type: 'poly', points: sq(1, 3, 1), fill: '#c9c9c9', verts: [vTL(1, 4, 'P'), vTR(2, 4, 'Q'), vBL(1, 3, 'R'), { x: 2, y: 3 }] },
-            { type: 'point', x: 8, y: 3, label: 'M', dx: 7, dy: -6 }
+          scene: () => scene({ cols: 14, rows: 10, elements: [
+            { type: 'poly', points: sq(1, 4, 1), fill: '#c9c9c9', verts: [vTL(1, 5, 'P'), vTR(2, 5, 'Q'), vBL(1, 4, 'R'), { x: 2, y: 4 }] },
+            { type: 'point', x: 9, y: 7, label: 'M', dx: 7, dy: -6 }
           ] }) },
 
-        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de un rectángulo colocado en posición vertical (mide 1 cuadro de ancho y 2 de alto). Se muestran tres esquinas del rectángulo (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si hacemos girar el rectángulo en la dirección este, paralelo al eje este, de tal forma que cada giro ubique sus vértices perfectamente sobre los vértices de la siguiente cuadrícula, y realizamos ese movimiento tres veces, ¿cuál sería la traslación que se debe realizar para que el vértice R, en su nueva posición, coincida con la marca M del piso?`,
+        { track: 'P', slideDesc: '2 unidades al norte', path: [[1, 6], [1, 8], [4, 7], [5, 6]], M: [9, 3],
+          enun: `El siguiente sistema de coordenadas muestra la ubicación actual de un rectángulo colocado en posición vertical (mide 1 cuadro de ancho y 2 de alto). Se muestran tres esquinas del rectángulo (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si el rectángulo se traslada 2 unidades al norte y luego da dos giros de 90° (rodando hacia el este, de modo que en cada giro sus vértices caen sobre los vértices de la cuadrícula), ¿cuál es la traslación que debe realizar el vértice P, en su nueva posición, para que coincida con la marca M del piso?`,
           nota: 'La medida del lado de cada cuadrado de la cuadrícula es 60 cm.',
-          giros: 3, path: [[1, 3], [2, 4], [5, 5], [7, 3]], M: [8, 5],
-          scene: () => scene({ cols: 10, rows: 7, elements: [
-            { type: 'poly', points: rectP(1, 3, 1, 2), fill: '#c9c9c9', verts: [vTL(1, 5, 'P'), vTR(2, 5, 'Q'), vBL(1, 3, 'R'), { x: 2, y: 3 }] },
-            { type: 'point', x: 8, y: 5, label: 'M', dx: 7, dy: -6 }
+          scene: () => scene({ cols: 14, rows: 10, elements: [
+            { type: 'poly', points: rectP(1, 4, 1, 2), fill: '#c9c9c9', verts: [vTL(1, 6, 'P'), vTR(2, 6, 'Q'), vBL(1, 4, 'R'), { x: 2, y: 4 }] },
+            { type: 'point', x: 9, y: 3, label: 'M', dx: 7, dy: -6 }
           ] }) },
 
-        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una pieza en forma de L. Se muestran tres esquinas de la pieza (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si hacemos girar la pieza en la dirección este, paralelo al eje este, de tal forma que en cada giro (una rotación de 90° apoyándose en su vértice inferior derecho) sus vértices caigan sobre los vértices de la cuadrícula, y realizamos ese movimiento tres veces, ¿cuál sería la traslación que se debe realizar para que el vértice R, en su nueva posición, coincida con la marca M del piso?`,
+        { track: 'R', slideDesc: '1 unidad al sur', path: [[1, 4], [1, 3], [3, 5], [6, 4]], M: [3, 8],
+          enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una pieza en forma de L. Se muestran tres esquinas de la pieza (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si la pieza se traslada 1 unidad al sur y luego da dos giros de 90° (en cada giro rota 90° apoyándose en su vértice inferior derecho, rodando hacia el este), ¿cuál es la traslación que debe realizar el vértice R, en su nueva posición, para que coincida con la marca M del piso?`,
           nota: 'La medida del lado de cada cuadrado de la cuadrícula es 60 cm.',
-          giros: 3, path: [[1, 3], [3, 5], [6, 4], [8, 2]], M: [6, 5],
-          scene: () => scene({ cols: 11, rows: 7, elements: [
-            { type: 'poly', points: [[1, 5], [2, 5], [2, 4], [3, 4], [3, 3], [1, 3]], fill: '#c9c9c9',
-              verts: [ { x: 1, y: 5, label: 'P', dx: -14, dy: -5 }, { x: 2, y: 5, label: 'Q', dx: 6, dy: -5 },
-                       { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 3, y: 3 }, { x: 1, y: 3, label: 'R', dx: -14, dy: 15 } ] },
-            { type: 'point', x: 6, y: 5, label: 'M', dx: 7, dy: -6 }
+          scene: () => scene({ cols: 14, rows: 10, elements: [
+            { type: 'poly', points: [[1, 6], [2, 6], [2, 5], [3, 5], [3, 4], [1, 4]], fill: '#c9c9c9',
+              verts: [ { x: 1, y: 6, label: 'P', dx: -14, dy: -5 }, { x: 2, y: 6, label: 'Q', dx: 6, dy: -5 },
+                       { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 3, y: 4 }, { x: 1, y: 4, label: 'R', dx: -14, dy: 15 } ] },
+            { type: 'point', x: 3, y: 8, label: 'M', dx: 7, dy: -6 }
+          ] }) },
+
+        { track: 'Q', slideDesc: '1 unidad al sur', giroDir: 'oeste', path: [[10, 6], [10, 5], [7, 4], [6, 3]], M: [2, 7],
+          enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una pieza en forma de L colocada al lado derecho. Se muestran tres esquinas de la pieza (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si la pieza se traslada 1 unidad al sur y luego da dos giros de 90° rodando hacia el oeste (en cada giro rota 90° apoyándose en su vértice inferior izquierdo, de modo que sus vértices caen sobre los vértices de la cuadrícula), ¿cuál es la traslación que debe realizar el vértice Q, en su nueva posición, para que coincida con la marca M del piso?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 60 cm.',
+          scene: () => scene({ cols: 14, rows: 10, elements: [
+            { type: 'poly', points: [[9, 6], [10, 6], [10, 5], [11, 5], [11, 4], [9, 4]], fill: '#c9c9c9',
+              verts: [ { x: 9, y: 6, label: 'P', dx: -14, dy: -5 }, { x: 10, y: 6, label: 'Q', dx: 6, dy: -5 },
+                       { x: 10, y: 5 }, { x: 11, y: 5 }, { x: 11, y: 4 }, { x: 9, y: 4, label: 'R', dx: -14, dy: 15 } ] },
+            { type: 'point', x: 2, y: 7, label: 'M', dx: 7, dy: -6 }
           ] }) }
       ];
 
@@ -914,13 +927,13 @@
         if (it.scene) card.appendChild(it.scene());
         if (it.nota) { const nb = document.createElement('div'); nb.className = 'nota'; nb.textContent = it.nota; card.appendChild(nb); }
         const ans = document.createElement('div'); ans.className = 'nivel-ans';
-        ans.innerHTML = `<h4>Indica la traslación para que R coincida con M</h4>
+        ans.innerHTML = `<h4>Indica la traslación para que ${it.track} coincida con M</h4>
           <div class="ci-grid">${['norte', 'sur', 'este', 'oeste'].map(d =>
             `<div class="ci"><span class="ci-name">${d[0].toUpperCase() + d.slice(1)}</span><span class="stepper"><button type="button" data-step="-1" data-for="${d}">−</button><input type="number" min="0" value="0" data-dir="${d}"><button type="button" data-step="1" data-for="${d}">+</button></span></div>`).join('')}</div>`;
         card.appendChild(ans);
         const comp = document.createElement('button'); comp.type = 'button'; comp.className = 'comprobar'; comp.textContent = 'Comprobar'; card.appendChild(comp);
         const fb = document.createElement('p'); fb.className = 'fb'; fb.style.display = 'none';
-        const sol = document.createElement('div'); sol.className = 'solucion'; sol.hidden = true; sol.innerHTML = nivelSol(it.path, it.giros, it.M, target);
+        const sol = document.createElement('div'); sol.className = 'solucion'; sol.hidden = true; sol.innerHTML = nivelSol(it.track, it.slideDesc, it.path, it.M, target, it.giroDir);
         card.appendChild(fb); card.appendChild(sol);
         const acts = document.createElement('div'); acts.className = 'item-actions';
         const bp = document.createElement('button'); bp.type = 'button'; bp.className = 'act-btn'; bp.innerHTML = '🖨 Imprimir';

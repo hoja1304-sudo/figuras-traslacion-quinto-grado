@@ -39,8 +39,8 @@
     /* Menú principal */
     .menu-wrap { text-align: center; }
     .menu-sub { color:#4a6675; font-size:1rem; margin: 4px 0 18px; }
-    .menu { display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; max-width: 640px; margin: 0 auto; }
-    @media (max-width: 620px){ .menu { grid-template-columns: 1fr; } }
+    .menu { display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; max-width: 860px; margin: 0 auto; }
+    @media (max-width: 760px){ .menu { grid-template-columns: 1fr; } }
     .menu-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-align:center;
       min-height: 150px; border:2px solid var(--gold); border-radius:22px; padding:22px 18px;
       background: linear-gradient(135deg,#ffffff,#eaf6fb); color:var(--blue-dark); font-weight:900; font-size:1.12rem;
@@ -141,6 +141,19 @@
     .act-btn:hover { border-color: var(--blue); }
     .placeholder { text-align:center; color:#6d8695; padding: 26px 16px; border: 2px dashed #cdd9e1; border-radius: 14px; background:#fafdff; }
     .nota { border:1px solid #b9cede; background:#f3f8fc; border-radius:10px; padding:8px 12px; margin:6px auto 2px; max-width:360px; text-align:center; font-size:11pt; color:#33566b; font-weight:700; }
+    /* Nivel+ : respuesta por puntos cardinales */
+    .nivel-ans { border:1px solid #cfe0ea; border-radius:14px; background:#f7fbfe; padding:14px; margin:12px 0; }
+    .nivel-ans h4 { margin:0 0 10px; color:var(--blue-dark); font-size:1rem; text-align:center; }
+    .ci-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; max-width:440px; margin:0 auto; }
+    @media (max-width:520px){ .ci-grid{ grid-template-columns:1fr; } }
+    .ci { display:flex; align-items:center; justify-content:space-between; gap:8px; border:2px solid #bcd2dd; border-radius:12px; padding:6px 10px; background:#fff; }
+    .ci .ci-name { font-weight:800; color:var(--blue-dark); min-width:54px; }
+    .ci .stepper { display:flex; align-items:center; gap:6px; }
+    .ci .stepper button { width:34px; height:34px; border:2px solid #bcd2dd; border-radius:8px; background:#fff; font-weight:900; color:var(--blue-dark); }
+    .ci .stepper button:hover { border-color:var(--blue); }
+    .ci .stepper input { width:54px; height:36px; text-align:center; border:2px solid #bcd2dd; border-radius:8px; font-weight:800; font-size:1rem; color:#152f40; }
+    .comprobar { display:block; margin:14px auto 0; border:0; border-radius:14px; background:var(--green); color:#fff; font-weight:900; padding:12px 28px; min-height:48px; box-shadow:0 5px 0 #0f5836; }
+    .comprobar:active { transform:translateY(3px); box-shadow:0 2px 0 #0f5836; }
     @media print {
       body * { visibility: hidden !important; }
       .item.printing, .item.printing * { visibility: visible !important; }
@@ -165,6 +178,7 @@
       <div class="menu">
         <button class="menu-btn" data-go="lab" type="button"><span class="ic" aria-hidden="true">🧪</span>Laboratorio<small>Traslada figuras en la cuadrícula</small></button>
         <button class="menu-btn" data-go="prob" type="button"><span class="ic" aria-hidden="true">📝</span>Problemas<small>Practica con ítems y soluciones</small></button>
+        <button class="menu-btn" data-go="nivel" type="button"><span class="ic" aria-hidden="true">⭐</span>Nivel+</button>
       </div>
     </section>
 
@@ -228,6 +242,14 @@
       </div>
       <p class="prob-intro">Selecciona una opción. Si es correcta, su borde se marca en verde con un ✓; si es incorrecta, se muestra la solución paso a paso.</p>
       <div id="itemsWrap"></div>
+    </section>
+
+    <!-- Nivel+ -->
+    <section class="panel" id="panelNivel" aria-label="Nivel+" hidden>
+      <div class="panel-nav"><button class="back-btn" data-go="menu" type="button">← Volver al menú</button></div>
+      <div class="prob-top"><button id="btnNuevoNivel" class="pill-btn" type="button">🔄 Nuevo ítem</button></div>
+      <p class="prob-intro">Retos de nivel olímpico (OLCOMEP ★★★ / estilo PISA). Indica la traslación con los botones de dirección y presiona <strong>Comprobar</strong>.</p>
+      <div id="nivelWrap"></div>
     </section>
 
     <footer class="credit"><strong>Elaborado por: Alberto Jiménez Ruiz</strong><br>Asesor Regional de Matemática DRE-Cartago-DAP-2026</footer>
@@ -512,7 +534,7 @@
       'use strict';
       const $ = (s, r = document) => r.querySelector(s);
 
-      const views = { menu: $('#menu'), lab: $('#panelLab'), prob: $('#panelProb') };
+      const views = { menu: $('#menu'), lab: $('#panelLab'), prob: $('#panelProb'), nivel: $('#panelNivel') };
       function go(name) {
         Object.entries(views).forEach(([k, elx]) => { if (elx) elx.hidden = (k !== name); });
         if (window.speechSynthesis) speechSynthesis.cancel();
@@ -838,6 +860,92 @@
       }
       $('#btnNuevo').addEventListener('click', nuevoItem);
       nuevoItem();
+
+      /* ---------- Nivel+ (retos olímpicos: rodar la figura) ---------- */
+      function nivelSol(path, giros, M, target) {
+        const rF = path[path.length - 1];
+        const pathStr = path.map(p => `(${p[0]}, ${p[1]})`).join(' → ');
+        const dxs = target.dx > 0 ? `${target.dx} al este` : target.dx < 0 ? `${-target.dx} al oeste` : '';
+        const dys = target.dy > 0 ? `${target.dy} al norte` : target.dy < 0 ? `${-target.dy} al sur` : '';
+        const ans = [dxs, dys].filter(Boolean).join(' y ') || 'ninguna (ya coincide)';
+        return `<h4>Solución paso a paso</h4>
+          <p class="paso">Paso 1. Seguir el vértice R mientras la figura rueda</p>
+          <p>Cada giro es una rotación de 90° apoyándose en el vértice inferior derecho, así la figura avanza hacia el este y sus vértices caen sobre los vértices de la cuadrícula.</p>
+          <p>Contando los cuadros desde el origen, el vértice R pasa por: <strong>${pathStr}</strong>.</p>
+          <p>Después de ${giros} giros, el vértice R queda en <strong>(${rF[0]}, ${rF[1]})</strong>.</p>
+          <p class="paso">Paso 2. Trasladar R hasta la marca M</p>
+          <p>La marca M está en (${M[0]}, ${M[1]}). Desde (${rF[0]}, ${rF[1]}) hasta (${M[0]}, ${M[1]}): en x, ${target.dx === 0 ? 'no cambia' : Math.abs(target.dx) + (target.dx > 0 ? ' al este' : ' al oeste')}; en y, ${target.dy === 0 ? 'no cambia' : Math.abs(target.dy) + (target.dy > 0 ? ' al norte' : ' al sur')}.</p>
+          <p>Por lo tanto, la traslación es <strong>${ans}</strong>.</p>`;
+      }
+
+      const NIVEL = [
+        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una baldosa cuadrada en el patio de una casa. Se muestran tres esquinas de esa baldosa (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si hacemos girar la baldosa en la dirección este, paralelo al eje este, de tal forma que cada giro ubique los vértices de la baldosa perfectamente sobre los vértices de la siguiente cuadrícula, y realizamos ese movimiento cinco veces, ¿cuál sería la traslación que se debe realizar para que el vértice R, en su nueva posición, coincida con la marca M del piso?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 60 cm.',
+          giros: 5, path: [[1, 3], [2, 4], [4, 4], [5, 3], [5, 3], [6, 4]], M: [8, 3],
+          scene: () => scene({ cols: 10, rows: 7, elements: [
+            { type: 'poly', points: sq(1, 3, 1), fill: '#c9c9c9', verts: [vTL(1, 4, 'P'), vTR(2, 4, 'Q'), vBL(1, 3, 'R'), { x: 2, y: 3 }] },
+            { type: 'point', x: 8, y: 3, label: 'M', dx: 7, dy: -6 }
+          ] }) },
+
+        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de un rectángulo colocado en posición vertical (mide 1 cuadro de ancho y 2 de alto). Se muestran tres esquinas del rectángulo (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si hacemos girar el rectángulo en la dirección este, paralelo al eje este, de tal forma que cada giro ubique sus vértices perfectamente sobre los vértices de la siguiente cuadrícula, y realizamos ese movimiento tres veces, ¿cuál sería la traslación que se debe realizar para que el vértice R, en su nueva posición, coincida con la marca M del piso?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 60 cm.',
+          giros: 3, path: [[1, 3], [2, 4], [5, 5], [7, 3]], M: [8, 5],
+          scene: () => scene({ cols: 10, rows: 7, elements: [
+            { type: 'poly', points: rectP(1, 3, 1, 2), fill: '#c9c9c9', verts: [vTL(1, 5, 'P'), vTR(2, 5, 'Q'), vBL(1, 3, 'R'), { x: 2, y: 3 }] },
+            { type: 'point', x: 8, y: 5, label: 'M', dx: 7, dy: -6 }
+          ] }) },
+
+        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una pieza en forma de L. Se muestran tres esquinas de la pieza (identificadas con P, Q y R) y una marca en el piso (identificada con M). Si hacemos girar la pieza en la dirección este, paralelo al eje este, de tal forma que en cada giro (una rotación de 90° apoyándose en su vértice inferior derecho) sus vértices caigan sobre los vértices de la cuadrícula, y realizamos ese movimiento tres veces, ¿cuál sería la traslación que se debe realizar para que el vértice R, en su nueva posición, coincida con la marca M del piso?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 60 cm.',
+          giros: 3, path: [[1, 3], [3, 5], [6, 4], [8, 2]], M: [6, 5],
+          scene: () => scene({ cols: 11, rows: 7, elements: [
+            { type: 'poly', points: [[1, 5], [2, 5], [2, 4], [3, 4], [3, 3], [1, 3]], fill: '#c9c9c9',
+              verts: [ { x: 1, y: 5, label: 'P', dx: -14, dy: -5 }, { x: 2, y: 5, label: 'Q', dx: 6, dy: -5 },
+                       { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 3, y: 3 }, { x: 1, y: 3, label: 'R', dx: -14, dy: 15 } ] },
+            { type: 'point', x: 6, y: 5, label: 'M', dx: 7, dy: -6 }
+          ] }) }
+      ];
+
+      function renderNivel(it, num) {
+        const rF = it.path[it.path.length - 1];
+        const target = { dx: it.M[0] - rF[0], dy: it.M[1] - rF[1] };
+        const card = document.createElement('div'); card.className = 'item';
+        const en = document.createElement('p'); en.className = 'enun'; en.innerHTML = `<span class="num">${num}</span>${it.enun}`; card.appendChild(en);
+        if (it.scene) card.appendChild(it.scene());
+        if (it.nota) { const nb = document.createElement('div'); nb.className = 'nota'; nb.textContent = it.nota; card.appendChild(nb); }
+        const ans = document.createElement('div'); ans.className = 'nivel-ans';
+        ans.innerHTML = `<h4>Indica la traslación para que R coincida con M</h4>
+          <div class="ci-grid">${['norte', 'sur', 'este', 'oeste'].map(d =>
+            `<div class="ci"><span class="ci-name">${d[0].toUpperCase() + d.slice(1)}</span><span class="stepper"><button type="button" data-step="-1" data-for="${d}">−</button><input type="number" min="0" value="0" data-dir="${d}"><button type="button" data-step="1" data-for="${d}">+</button></span></div>`).join('')}</div>`;
+        card.appendChild(ans);
+        const comp = document.createElement('button'); comp.type = 'button'; comp.className = 'comprobar'; comp.textContent = 'Comprobar'; card.appendChild(comp);
+        const fb = document.createElement('p'); fb.className = 'fb'; fb.style.display = 'none';
+        const sol = document.createElement('div'); sol.className = 'solucion'; sol.hidden = true; sol.innerHTML = nivelSol(it.path, it.giros, it.M, target);
+        card.appendChild(fb); card.appendChild(sol);
+        const acts = document.createElement('div'); acts.className = 'item-actions';
+        const bp = document.createElement('button'); bp.type = 'button'; bp.className = 'act-btn'; bp.innerHTML = '🖨 Imprimir';
+        const bd = document.createElement('button'); bd.type = 'button'; bd.className = 'act-btn'; bd.innerHTML = '⬇ Descargar PDF';
+        acts.appendChild(bp); acts.appendChild(bd); card.appendChild(acts);
+        bp.addEventListener('click', () => printItem(card)); bd.addEventListener('click', () => pdfItem(card));
+        ans.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', () => {
+          const inp = ans.querySelector(`input[data-dir="${b.dataset.for}"]`); let v = (+inp.value || 0) + (+b.dataset.step); if (v < 0) v = 0; inp.value = v;
+        }));
+        comp.addEventListener('click', () => {
+          const g = n => +ans.querySelector(`input[data-dir="${n}"]`).value || 0;
+          const dx = g('este') - g('oeste'), dy = g('norte') - g('sur');
+          if (dx === target.dx && dy === target.dy) { fb.style.display = 'block'; fb.className = 'fb ok'; fb.textContent = '🎉 ¡Excelente! Resolviste el reto correctamente.'; sol.hidden = true; }
+          else { fb.style.display = 'block'; fb.className = 'fb no'; fb.textContent = 'Aún no es correcto. Revisa la solución paso a paso:'; sol.hidden = false; }
+        });
+        return card;
+      }
+      const nivelWrap = $('#nivelWrap');
+      let lastNivel = -1, nivelCount = 0;
+      function nuevoNivel() {
+        let i; if (NIVEL.length <= 1) i = 0; else { do { i = Math.floor(Math.random() * NIVEL.length); } while (i === lastNivel); }
+        lastNivel = i; nivelCount++; nivelWrap.innerHTML = ''; nivelWrap.appendChild(renderNivel(NIVEL[i], nivelCount));
+      }
+      $('#btnNuevoNivel').addEventListener('click', nuevoNivel);
+      nuevoNivel();
     })();
   </script>
 </body>

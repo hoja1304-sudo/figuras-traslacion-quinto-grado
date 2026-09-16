@@ -727,7 +727,24 @@
             <p>120 cm ÷ 60 = 2 al este; 180 cm ÷ 60 = 3 al sur.</p>
             <p class="paso">Paso 2. Trasladar las esquinas</p>
             <p>Al mover cada esquina 2 cuadros al este y 3 cuadros al sur, la esquina <strong>Q</strong> cae exactamente sobre la marca <strong>M</strong>.</p>
-            <p>Por lo tanto, la esquina que coincide con M es <strong>Q</strong>.</p>` }
+            <p>Por lo tanto, la esquina que coincide con M es <strong>Q</strong>.</p>` },
+
+        // N6) Pieza en forma de T — esquina que coincide con M (cuatro letras)
+        { enun: `El siguiente sistema de coordenadas muestra la ubicación actual de una pieza en forma de T en el piso de un taller. Se muestran cuatro esquinas de esa pieza (identificadas con W, X, Y y Z) y una marca en el piso (identificada con M). Posteriormente, la pieza se traslada hacia una nueva ubicación que corresponde a 100 cm al este y 150 cm al sur. De acuerdo con la información anterior, ¿cuál esquina de la pieza coincide con la marca M?`,
+          nota: 'La medida del lado de cada cuadrado de la cuadrícula es 50 cm.',
+          scene: () => scene({ cols: 10, rows: 9, elements: [
+            { type: 'poly', points: [[2, 7], [5, 7], [5, 6], [4, 6], [4, 5], [3, 5], [3, 6], [2, 6]], fill: '#c9c9c9',
+              verts: [ { x: 2, y: 7, label: 'W', dx: -14, dy: -5 }, { x: 5, y: 7, label: 'X', dx: 6, dy: -5 },
+                       { x: 3, y: 5, label: 'Y', dx: -14, dy: 15 }, { x: 4, y: 5, label: 'Z', dx: 6, dy: 15 } ] },
+            { type: 'point', x: 7, y: 4, label: 'M', dx: 7, dy: -6 }
+          ] }),
+          opts: ['W', 'X', 'Y', 'Z'], correcta: 1,
+          sol: `<h4>Solución paso a paso</h4>
+            <p class="paso">Paso 1. Convertir el desplazamiento en cuadros (cada cuadro = 50 cm)</p>
+            <p>100 cm ÷ 50 = 2 al este; 150 cm ÷ 50 = 3 al sur.</p>
+            <p class="paso">Paso 2. Trasladar las esquinas</p>
+            <p>Al mover cada esquina 2 cuadros al este y 3 cuadros al sur, la esquina <strong>X</strong> cae exactamente sobre la marca <strong>M</strong>.</p>
+            <p>Por lo tanto, la esquina que coincide con M es <strong>X</strong>.</p>` }
       ];
 
       const keys = ['A', 'B', 'C', 'D'];
